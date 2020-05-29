@@ -1,6 +1,8 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
+
 
 public class LevelController : MonoBehaviour
 {
@@ -80,7 +82,7 @@ public class LevelController : MonoBehaviour
             }
         }
     }
-
+    
     // Update is called once per frame
     void Update()
     {
@@ -91,21 +93,36 @@ public class LevelController : MonoBehaviour
         else if (Input.GetKeyDown("down")) direction = Vector3.down;
         else if (Input.GetKeyDown("left")) direction = Vector3.left;
         else if (Input.GetKeyDown("right")) direction = Vector3.right;
+        
+        /*int i = 0;
+        while(true)
+        {
+            if (!idle) return;
+            Vector3 direction = Vector3.zero;
+            if (i % 2 == 0) direction = Vector3.up;
+            else direction = Vector3.down;
+            if (direction != Vector3.zero)
+                StartCoroutine(Action(direction));
+            i++;
+        }*/
 
-        if (direction != Vector3.zero)
-            StartCoroutine(Action(direction));
+
+            if (direction != Vector3.zero)
+                StartCoroutine(Action(direction));
     }
 
     IEnumerator Action(Vector3 direction) {
 
-        // Player move 1 step
+        // Player move 1 steps
         if (Blocked(player.transform.localPosition, direction)) yield break;
 
         idle = false;
         yield return player.Move(direction, false);
-        
-        // Mummy move 2 step
+
+       
+        // Mummy move 2 steps
         for (int step = 0; step < 2; step++) {
+            
             yield return MummiesMove();
 
             if (MummiesCatch()) {
@@ -150,9 +167,156 @@ public class LevelController : MonoBehaviour
         Instantiate(loseOverlay, transform, true);
     }
 
-    // Mummies    
+    List<((int , int), Vector3 , int)> GetSuccessors(Vector3 position)
+    {
+        
+        int px = (int)position.x;
+        int py = (int)position.y;
+        
+        var successors = new List<((int, int), Vector3, int)>();
+        
+        
+        for (int i  = 0; i < 4; i++) // loop through 4 directions
+        {
+            var action = new Vector3();
+            var nextx = 0;
+            var nexty = 0;
+            //var (nextx, nexty) = (0, 0);
+            if (i == 0)
+            {
+                (nextx, nexty) = (px - 1, py); // WEST
+                action = Vector3.left;
+            }
+            if (i == 1)
+            {
+                (nextx, nexty) = (px + 1, py); // EAST
+                action = Vector3.right;
+            }
+            if (i == 2)
+            {
+                (nextx, nexty) = (px, py - 1); // SOUTH
+                action = Vector3.down;
+            }
+            if (i == 3)
+            {
+                (nextx, nexty) = (px, py + 1); // NORTH
+                action = Vector3.up;
+            }
+           
+            //Blocked(position, action);
+            if (!Blocked(position, action))
+            { 
+                var nextState = (nextx, nexty);
+                var cost = 1;
+                var tmp = (nextState, action, cost); // dont know how to add directly to successors              
+                successors.Add(tmp);
+                
+            }
+        }
+        return successors;
+    }
+    double EuclideanDistance(int x, int y, int px, int py)
+    {
+        
+        return Math.Sqrt(Math.Pow(x - px, 2) + Math.Pow(y - py, 2));
+    }
+      
+    ArrayList AstarSearch(Vector3 position)
+    {
+        
+        int x = (int)player.transform.localPosition.x;
+        int y = (int)player.transform.localPosition.y;
+        int z = (int)player.transform.localPosition.z;
+        int px = (int)position.x;
+        int py = (int)position.y;
+        int pz = (int)position.z;
+        var startingNode = (px, py); // starting point (x,y)
+        var goalNode = (x, y); // player position 
+        
+        var visitedNodes = new ArrayList(); //visited nodes
+
+
+        var path = new ArrayList // initial the path array 
+        {
+            Vector3.zero 
+        }; // a list of vector3 (Vector3.up, Vector3.down, Vector3.left, Vector3.right)
+        if (px == x && py == y) return path; // the mummies caught the player
+
+        
+        List<(((int, int), ArrayList, double), double)> pQueuelist = new List<(((int, int), ArrayList, double), double)> // List of nodes will be processed
+        {
+            ((startingNode, path, 0.0), 0.0) // the fisrt item in the pQueuelist
+        };
+
+        while (pQueuelist.Count != 0)
+        {
+
+            var (currentNode, actions, prevCost) = (pQueuelist[0].Item1.Item1, pQueuelist[0].Item1.Item2, pQueuelist[0].Item1.Item3);
+            pQueuelist.RemoveAt(0); // remove the first item after adding its successor to the list
+
+            if (!visitedNodes.Contains(currentNode)) // check whether the current is in the list of visited nodes
+            {
+                visitedNodes.Add(currentNode);
+
+
+                if (currentNode.Equals(goalNode)) //check whether the mummy reaches the goal 
+                    return actions;
+                
+
+
+                Vector3 tmp = new Vector3
+                {
+                    x = currentNode.Item1,
+                    y = currentNode.Item2
+                };
+                var successors = GetSuccessors(tmp); // return number of possible moves
+
+                for (int i = 0; i < successors.Count; i++)
+                {
+                    var (nextNode, action, cost) = (successors[i].Item1, successors[i].Item2, successors[i].Item3);
+
+
+                    var newActions = new ArrayList(); // new set of action
+                    newActions = (ArrayList)actions.Clone();
+                    newActions.Add(action);
+
+                    double newCostToNode = prevCost + cost;
+                    double heuristicCost = newCostToNode + EuclideanDistance(nextNode.Item1, nextNode.Item2, goalNode.x, goalNode.y);
+                    var tmp1 = ((nextNode, newActions, newCostToNode), heuristicCost); // create the tmp1 cause dont know how to add directly to the pQueuelist
+
+                    if (pQueuelist.Count >= 1) // sorting and adding item to the pQueuelist (295 -> 313)
+                    {
+                        int check = 0;
+                        for (int j = 0; j < pQueuelist.Count; j++)
+                        {
+                            if (heuristicCost < pQueuelist[j].Item2)
+                            {
+                                check = 1;
+                                pQueuelist.Insert(j, tmp1);
+                                break;
+                            }
+
+                        }
+                        if (check == 0)
+                        {
+                            pQueuelist.Add(tmp1);
+                        }
+                    }
+                    else pQueuelist.Add(tmp1);
+                }       
+            }
+
+        }        
+        return path;
+    }
+
+    // Mummies  
     Vector3 WhiteTrace(Vector3 position) {
-        int x = (int) player.transform.localPosition.x;
+        var directions = AstarSearch(position);
+    
+
+
+        /*int x = (int) player.transform.localPosition.x;
         int y = (int) player.transform.localPosition.y;
         int z = (int) player.transform.localPosition.z;
         int px = (int) position.x;
@@ -168,9 +332,14 @@ public class LevelController : MonoBehaviour
         if (y > py) return Vector3.up;
         if (y < py) return Vector3.down;
         if (x > px) return Vector3.right;
-        if (x < px) return Vector3.left;
-
+        if (x < px) return Vector3.left;*/
+        if (directions[1].Equals(Vector3.up)) return Vector3.up;
+        if (directions[1].Equals(Vector3.down)) return Vector3.down;
+        if (directions[1].Equals(Vector3.left)) return Vector3.left;
+        if (directions[1].Equals(Vector3.right)) return Vector3.right;
         return Vector3.zero;
+        
+        
     }
 
     Vector3 RedTrace(Vector3 position) {
@@ -197,7 +366,7 @@ public class LevelController : MonoBehaviour
 
     IEnumerator MummiesMove() {
         List<IEnumerator> coroutines = new List<IEnumerator>();
-
+        
         foreach (var mummy in mummies) {
             Vector3 next_move = mummy.tag == "WhiteMummy"
                 ? WhiteTrace(mummy.transform.localPosition)
@@ -255,18 +424,30 @@ public class LevelController : MonoBehaviour
         int x = (int)position.x;
         int y = (int)position.y;
         int n = size-1;
-        
+
         if (direction == Vector3.up)
-            return y == n || horizontalWall[x, y+1] == 1;
+        {
+            
+            return y == n || horizontalWall[x, y + 1] == 1;
+        }
 
         if (direction == Vector3.down)
+        {
+            
             return y == 0 || horizontalWall[x, y] == 1;
+        }
 
         if (direction == Vector3.left)
+        {
+            
             return x == 0 || verticalWall[x, y] == 1;
-        
+        }
+
         if (direction == Vector3.right)
-            return x == n || verticalWall[x+1, y] == 1;
+        {
+           
+            return x == n || verticalWall[x + 1, y] == 1;
+        }
         
         return true;
     }
@@ -295,8 +476,10 @@ public class LevelController : MonoBehaviour
 
     // Undo
     public void Save() {
-        var checkpoint = new Checkpoint();
-        checkpoint.player = player.transform.localPosition;
+        var checkpoint = new Checkpoint
+        {
+            player = player.transform.localPosition
+        };
         foreach (var mummy in mummies) {
             checkpoint.mummies.Add(mummy.transform.localPosition);
         }
@@ -306,5 +489,12 @@ public class LevelController : MonoBehaviour
     public void Restore() {
         var checkpoint = (Checkpoint)checkpoints.Pop();
         
+    }
+}
+
+internal class List<T1, T2>
+{
+    public List()
+    {
     }
 }
