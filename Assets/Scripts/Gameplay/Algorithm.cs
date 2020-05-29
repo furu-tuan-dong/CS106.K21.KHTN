@@ -1,10 +1,11 @@
-﻿using JetBrains.Annotations;
+using JetBrains.Annotations;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 //using System.Diagnostics;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
@@ -14,18 +15,19 @@ using UnityEngine;
 
 public class GameState
 {
-    private Character player;
-    private Vector3 playerPos;
-    private List<Character> mummies;
-    private List<Vector3> mummiesPos = new List<Vector3>();
-    private int size;
-    private int[,] verticalWall;
-    private int[,] horizontalWall;
-    private Vector3 stairPosition;
+    Character player;
+    Vector3 playerPos;
+    List<Character> mummies;
+    public List<Vector3> mummiesPos = new List<Vector3>();
+    int size;
+    int[,] verticalWall;
+    int[,] horizontalWall;
+    Vector3 stairPosition;
     //private bool get_pos = true;
     AI_Controller control = new AI_Controller();
     int numMummies;
 
+    public GameState() { }
     public GameState(Character player, List<Character> mummies, int size,
         int[,] verticalWall, int[,] horizontalWall, Vector3 stairPosition)
     {
@@ -37,13 +39,6 @@ public class GameState
         this.verticalWall = verticalWall;
         this.horizontalWall = horizontalWall;
         this.stairPosition = stairPosition;
-
-        //mummyAndAction = new Vector3[mummies.Count, 2];
-        //for(int i = 0; i < numMummies; i++)
-        //{
-        //    mummyAndAction[i, 0] = mummies[i].transform.localPosition;
-        //}
-
 
         foreach(Character mummy in mummies)
         {
@@ -59,20 +54,11 @@ public class GameState
             //Player
             Vector3[] playerResult = new Vector3[] { playerPos, direction };
             result.Add(playerResult);
-            Debug.Log(result[0][1]);
-            Debug.Log(result[0][0]);
             playerPos += direction;
 
             //Update mummies's position.
             MummiesMove(result);
-
         }
-
-        //for(int i = 0;i < result.Count; i++)
-        //{
-        //    Debug.Log(result[i][0]);
-        //}
-        
 
         return result;
     }
@@ -86,40 +72,24 @@ public class GameState
             if(mummies[i].tag == "WhiteMummy")
             {
                 nextMove = WhiteTrace(mummiesPos[i]);
-                if(isBlocked(nextMove, mummiesPos[i]))
-                {
-                    return;
-                }
                 resultMummy = new Vector3[] { mummiesPos[i], nextMove };
                 result.Add(resultMummy);
             }
             else
             {
                 nextMove = RedTrace(mummiesPos[i]);
-                if (isBlocked(nextMove, mummiesPos[i]))
-                {
-                    return;
-                }
                 resultMummy = new Vector3[] { mummiesPos[i], nextMove };
                 result.Add(resultMummy);
             }
 
-            //mummyAndAction[i, 0] += nextMove;
             mummiesPos[i] += nextMove;
         }
     }
-    
+   
     Vector3 WhiteTrace(Vector3 position)
     {
         AstarSearch actions = new AstarSearch(this, position);
         Vector3 getAction = actions.GetActions();
-        //for (int i = 0; i< numMummies; i++)
-        //{
-        //    if(mummiesPos[i] == position)
-        //    {
-        //        mummiesPos[i] = getAction;
-        //    }
-        //}
         return getAction;
     }
 
@@ -127,39 +97,8 @@ public class GameState
     {
         AstarSearch actions = new AstarSearch(this, position);
         Vector3 getAction = actions.GetActions();
-        //for (int i = 0; i < numMummies; i++)
-        //{
-        //    if (mummiesPos[i] == position)
-        //    {
-        //        mummiesPos[i] = getAction;
-        //    }
-        //}
         return getAction;
     }
-
-    //public Vector3 getWhiteTrace(Vector3 position)
-    //{
-    //    for(int i = 0; i < numMummies; i++)
-    //    {
-    //        if(mummyAndAction[i, 0] == position)
-    //        { 
-    //            return mummyAndAction[i, 1];
-    //        }
-    //    }
-    //    return Vector3.zero;
-    //}
-
-    //public Vector3 getRedTrace(Vector3 position)
-    //{
-    //    for (int i = 0; i < numMummies; i++)
-    //    {
-    //        if (mummyAndAction[i, 0] == position)
-    //        {
-    //            return mummyAndAction[i, 1];
-    //        }
-    //    }
-    //    return Vector3.zero;
-    //}
     
     public bool isBlocked(Vector3 direction, Vector3 position)
     {
@@ -182,98 +121,12 @@ public class GameState
         return true;
     }
 
-
-    //public List<Vector3> GetSuccessors(Vector3 position)
-    //{
-    //    List<Vector3> successors = new List<Vector3>();
-    //    Vector3[] directions = new Vector3[] { Vector3.left, Vector3.up, Vector3.right, Vector3.down };
-    //    foreach(Vector3 direction in directions)
-    //    {
-    //        if(!isBlocked(direction, position))
-    //        {
-    //            successors.Add(position + direction);
-    //        }
-    //    }
-
-    //    return successors;
-    //}
-    
     public Vector3 GetPlayerPosition()
     {
         return playerPos;
     }
 
-    //public void print(bool idle)
-    //{
-    //    if (idle == true && get_pos == true)
-    //    {
-    //        get_pos = false;
-    //        Debug.Log(player.transform.localPosition);
-    //        foreach (Character m in mummies)
-    //        {
-    //            Debug.Log(m.transform.localPosition);
-    //        }
-    //        return;
-
-    //    }
-    //    if (idle == false)
-    //    {
-    //        get_pos = true;
-    //    }
-
-    //    //Debug.Log(verticalWall);
-    //    //Debug.Log(horizontalWall[3, 2]);
-    //}
-
-
-    
-    //public Vector3 getAction()
-    //{
-    //    Agent a = expectimax(2);
-    //    return a.getAction();
-    //}
-
-
-    //int d = 0;
-    //public Agent expectimax(int depth)
-    //{
-    //    Agent currentAgent = new Agent();
-    //    Vector3[] directions = new Vector3[] { Vector3.left, Vector3.up, Vector3.right, Vector3.down };
-
-    //    //Check termination.
-    //    if(d == depth)
-    //    {
-    //        currentAgent.set(Vector3.zero, evaluationFunction());
-            
-    //        return currentAgent;
-    //    }
-
-    //    foreach(Vector3 direction in directions)
-    //    {
-    //        Agent value;
-    //        control.Action(direction);
-    //        value = expectimax(d);
-    //        //The first action, agent is not assigned direction and value
-    //        if (currentAgent.getValue() == -1)
-    //        {
-    //            currentAgent.set(direction, value.getValue());
-    //        }
-    //        else
-    //        {
-    //            if (value.getValue() > currentAgent.getValue())
-    //            {
-    //                currentAgent.set(direction, value.getValue());
-    //            }
-    //        }
-    //    }
-    //    d += 1;
-
-    //    return currentAgent;
-    //}
-
-    
-
-    
+  
 }
 
 public class Node
@@ -306,7 +159,10 @@ public class Node
 
     public void setTracePath(List<Vector3> preTracePath, Vector3 direction)
     {
-        tracePath = preTracePath;
+        foreach(Vector3 path in preTracePath)
+        {
+            tracePath.Add(path);
+        }
         tracePath.Add(direction);
     }
 
@@ -323,7 +179,7 @@ public class Node
 
 public class AstarSearch
 {
-    GameState state;
+    GameState state = new GameState();
     Vector3 startedPosition;
     public AstarSearch(GameState state, Vector3 startedPosition)
     {
@@ -333,53 +189,50 @@ public class AstarSearch
     
     public Vector3 GetActions()
     {
-        //Node start = new Node(startedPosition);
-        //List<Node> frontiers = new List<Node>();
-        //List<Vector3> closed = new List<Vector3>();
-        //frontiers.Add(start);
-        //closed.Add(start.getPosition());
+        Node start = new Node(startedPosition);
+        List<Node> frontiers = new List<Node>();
+        List<Vector3> closed = new List<Vector3>();
+        frontiers.Add(start);
 
-        //if (isCatch(state, start.getPosition()))
-        //{
-        //    return Vector3.zero;
-        //    //return start.getFirstDirection();
-        //}
+        if (isCatch(state, start.getPosition()))
+        {
+            return Vector3.zero;
+        }
 
 
-        //while (frontiers.Count != 0)
-        //{
-        //    Node currentNode = frontiers[0];
-        //    frontiers.RemoveAt(0);
-        //    Vector3 currentPos = currentNode.getPosition();
-        //    List<Vector3> currentTracePath = currentNode.getTracePath();
+        while (frontiers.Count != 0)
+        {
+            Node currentNode = frontiers[0];
+            frontiers.RemoveAt(0);
+            Vector3 currentPos = currentNode.getPosition();
+            List<Vector3> currentTracePath = currentNode.getTracePath();
 
-        //    if (isCatch(state, currentPos))
-        //    {
-        //        return currentNode.getFirstDirection();
-        //    }
+            if (isCatch(state, currentPos))
+            {
+                return currentNode.getFirstDirection();
+            }
 
-        //    closed.Add(currentPos);
+            closed.Add(currentPos);
 
-        //    Vector3[] directions = new Vector3[] { Vector3.left, Vector3.up, Vector3.right, Vector3.down };
-        //    foreach (Vector3 direction in directions)
-        //    {
+            Vector3[] directions = new Vector3[] { Vector3.left, Vector3.up, Vector3.right, Vector3.down };
+            foreach (Vector3 direction in directions)
+            {
 
-        //        if (!state.isBlocked(direction, currentPos))
-        //        {
-        //            Node newNode = new Node(currentPos + direction);
-        //            newNode.setTracePath(currentTracePath, direction);
-        //            newNode.updateValue(Heuristic(state, newNode.getPosition()));
+                if (!state.isBlocked(direction, currentPos))
+                {
+                    Node newNode = new Node(currentPos + direction);
+                    newNode.setTracePath(currentTracePath, direction);
+                    newNode.updateValue(Heuristic(state, newNode.getPosition()));
 
-        //            if (!closed.Contains(newNode.getPosition()))
-        //            {
-        //                update(frontiers, newNode);
-        //            }
-        //        }
-        //    }
-        //}
+                    if (!closed.Contains(newNode.getPosition()))
+                    {
+                        update(frontiers, newNode);
+                    }
+                }
+            }
+        }
 
-        //return Vector3.zero;
-        return Vector3.right;
+        return Vector3.zero;
     }
 
     void update(List<Node> list, Node insertedNode)
@@ -411,11 +264,11 @@ public class AstarSearch
                 if(insertedNode.getValue() <= list[i].getValue())
                 {
                     list.Insert(i, insertedNode);
+                    return;
                 }
             }
+            list.Add(insertedNode);
         }
-        
-        list.Add(insertedNode);
     }
 
     bool isCatch(GameState state, Vector3 position)
