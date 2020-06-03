@@ -43,7 +43,7 @@ public class AI_Controller : MonoBehaviour
         horizontalWall = new int[size, size];
     }
 
-    GameState state;
+    GameState controlState;
 
 
     // Start is called before the first frame update
@@ -87,16 +87,10 @@ public class AI_Controller : MonoBehaviour
             }
         }
 
-
-        //List<Vector3> mummiesPos = new List<Vector3>();
-        //foreach(Character mummy in mummies)
-        //{
-        //    mummiesPos.Add(mummy.transform.localPosition);
-        //}
-        state = new GameState(player, mummies, size, verticalWall, horizontalWall, stairPosition);
+        controlState = new GameState(player, mummies, size, verticalWall, horizontalWall, stairPosition);
     }
 
-  
+    
     // Update is called once per frame
     void Update()
     {
@@ -104,42 +98,49 @@ public class AI_Controller : MonoBehaviour
         {
             return;
         }
-        
-        Vector3 direction = Vector3.zero;
 
-        if (Input.GetKeyDown("up")) direction = Vector3.up;
-        else if (Input.GetKeyDown("down")) direction = Vector3.down;
-        else if (Input.GetKeyDown("left")) direction = Vector3.left;
-        else if (Input.GetKeyDown("right")) direction = Vector3.right;
+        //Vector3 direction = Vector3.zero;
+
+        //if (Input.GetKeyDown("up")) direction = Vector3.up;
+        //else if (Input.GetKeyDown("down")) direction = Vector3.down;
+        //else if (Input.GetKeyDown("left")) direction = Vector3.left;
+        //else if (Input.GetKeyDown("right")) direction = Vector3.right;
+        //if (Input.GetButtonDown("Action"))
+        //{
+        //    StartCoroutine(Action());
+        //}
+        StartCoroutine(Action());
 
 
         //direction = actions[i]
         
 
-        if (direction != Vector3.zero)
-        {
-            StartCoroutine(Action(direction));
-        }
-
-        
-
-        //al.print(idle);
+        //if (direction != Vector3.zero)
+        //{
+        //    StartCoroutine(Action(direction));
+        //}
     }
 
-    public IEnumerator Action(Vector3 direction) {
+    public IEnumerator Action() {
+
+        actions = controlState.Action();
+        if (actions.Count == 0) yield break;
+  
+        Vector3 playerAction = actions[0][1];
 
         // Player move 1 step
-        if (Blocked(player.transform.localPosition, direction)) yield break;
-        actions = state.Action(direction);
+        if (Blocked(player.transform.localPosition, playerAction)) yield break;
+        
 
         idle = false;
-        yield return player.Move(direction, false);
+        yield return player.Move(playerAction, false);
 
-        //if (MummiesCatch())
-        //{
-        //    yield return Lost();
-        //    yield break;
-        //} 
+        if (MummiesCatch())
+        {
+            yield return Lost();
+            yield break;
+        }
+
         yield return MummiesMove(actions);
 
         if (MummiesCatch())
@@ -148,8 +149,8 @@ public class AI_Controller : MonoBehaviour
             yield break;
         }
 
-        //yield return MummiesFight();
-        
+        yield return MummiesFight();
+
 
         if (player.transform.localPosition == stairPosition)
         {
@@ -220,36 +221,41 @@ public class AI_Controller : MonoBehaviour
         return false;
     }
 
-    //IEnumerator MummiesFight() {
-    //    // Group mummy by position
-    //    var positions = new Dictionary<Vector3, List<Character>>();
+    IEnumerator MummiesFight()
+    {
+        // Group mummy by position
+        var positions = new Dictionary<Vector3, List<Character>>();
 
-    //    foreach (var mummy in mummies) {
-    //        Vector3 key = mummy.transform.localPosition;
-    //        if (!positions.ContainsKey(key))
-    //            positions.Add(key, new List<Character>());
-            
-    //        positions[key].Add(mummy);
-    //    }
+        foreach (var mummy in mummies)
+        {
+            Vector3 key = mummy.transform.localPosition;
+            if (!positions.ContainsKey(key))
+                positions.Add(key, new List<Character>());
 
-    //    //Delete mummy and run effect
-    //    var effects = new List<IEnumerator>();
-        
-    //    foreach (var item in positions) {
-    //        if (item.Value.Count == 1) continue;
+            positions[key].Add(mummy);
+        }
 
-    //        // Preserve one
-    //        item.Value.RemoveAt(0);
-    //        foreach (var mummy in item.Value) {
-    //            mummies.Remove(mummy);
-    //            Destroy(mummy.gameObject);
-    //        }
-            
-    //        effects.Add(RunEffect(dust_effect, item.Key, true));
-    //    }
+        //Delete mummy and run effect
+        var effects = new List<IEnumerator>();
 
-    //    yield return PromiseAll(effects.ToArray());
-    //}
+        foreach (var item in positions)
+        {
+            if (item.Value.Count == 1) continue;
+
+            // Preserve one
+            item.Value.RemoveAt(0);
+            foreach (var mummy in item.Value)
+            {
+                mummies.Remove(mummy);
+                Destroy(mummy.gameObject);
+            }
+
+            effects.Add(RunEffect(dust_effect, item.Key, true));
+        }
+
+        yield return PromiseAll(effects.ToArray());
+        controlState.Update(mummies);
+    }
 
     // Character vs walls
     public bool Blocked(Vector3 position, Vector3 direction) {
