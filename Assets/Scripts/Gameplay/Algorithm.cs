@@ -1,10 +1,12 @@
 using JetBrains.Annotations;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 //using System.Diagnostics;
 using System.Linq;
+//using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,6 +14,7 @@ using System.Xml.Serialization;
 using UnityEditor;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 public class GameState
 {
@@ -23,11 +26,27 @@ public class GameState
     int[,] verticalWall;
     int[,] horizontalWall;
     Vector3 stairPosition;
-    //private bool get_pos = true;
-    AI_Controller control = new AI_Controller();
+    //AI_Controller control = new AI_Controller();
     int numMummies;
 
     public GameState() { }
+
+    public GameState(GameState other)
+    {
+        player = other.player;
+        playerPos = other.playerPos;
+        mummies = other.mummies;
+        foreach(Vector3 mumPos in other.mummiesPos)
+        {
+            mummiesPos.Add(mumPos);
+        }
+        size = other.size;
+        verticalWall = other.verticalWall;
+        horizontalWall = other.horizontalWall;
+        stairPosition = other.stairPosition;
+        numMummies = other.numMummies;
+    }
+
     public GameState(Character player, List<Character> mummies, int size,
         int[,] verticalWall, int[,] horizontalWall, Vector3 stairPosition)
     {
@@ -40,27 +59,45 @@ public class GameState
         this.horizontalWall = horizontalWall;
         this.stairPosition = stairPosition;
 
-        foreach(Character mummy in mummies)
+        foreach (Character mummy in mummies)
         {
             mummiesPos.Add(mummy.transform.localPosition);
         }
     }
 
-    public List<Vector3[]> Action(Vector3 direction)
+    public void Update(List<Character> mummies)
+    {
+        mummiesPos.Clear();
+        // Update list mummies if the mummies conflict.
+        foreach(Character mummy in mummies)
+        {
+            mummiesPos.Add(mummy.transform.localPosition);
+        }
+        numMummies = mummiesPos.Count;
+    }
+
+    public List<Vector3[]> Action()
     {
         List<Vector3[]> result = new List<Vector3[]>();
-        if (!isBlocked(direction, playerPos))
+
+        //Player
+        Vector3 playerAction = PlayerMove();
+        if (!isBlocked(playerAction, playerPos))
         {
-            //Player
-            Vector3[] playerResult = new Vector3[] { playerPos, direction };
+            Vector3[] playerResult = new Vector3[] { playerPos, playerAction };
             result.Add(playerResult);
-            playerPos += direction;
+            playerPos += playerAction;
 
             //Update mummies's position.
             MummiesMove(result);
         }
-
+       
         return result;
+    }
+    Vector3 PlayerMove()
+    {
+        Minimax action = new Minimax(this, 4);
+        return action.GetAction();
     }
 
     void MummiesMove(List<Vector3[]> result)
@@ -71,13 +108,13 @@ public class GameState
             Vector3[] resultMummy;
             if(mummies[i].tag == "WhiteMummy")
             {
-                nextMove = WhiteTrace(mummiesPos[i]);
+                nextMove = WhiteTrace(mummiesPos[i])[0];
                 resultMummy = new Vector3[] { mummiesPos[i], nextMove };
                 result.Add(resultMummy);
             }
             else
             {
-                nextMove = RedTrace(mummiesPos[i]);
+                nextMove = RedTrace(mummiesPos[i])[0];
                 resultMummy = new Vector3[] { mummiesPos[i], nextMove };
                 result.Add(resultMummy);
             }
@@ -86,17 +123,17 @@ public class GameState
         }
     }
    
-    Vector3 WhiteTrace(Vector3 position)
+    List<Vector3> WhiteTrace(Vector3 position)
     {
         AstarSearch actions = new AstarSearch(this, position);
-        Vector3 getAction = actions.GetActions();
+        List<Vector3> getAction = actions.GetActions();
         return getAction;
     }
 
-    Vector3 RedTrace(Vector3 position)
+    List<Vector3> RedTrace(Vector3 position)
     {
         AstarSearch actions = new AstarSearch(this, position);
-        Vector3 getAction = actions.GetActions();
+        List<Vector3> getAction = actions.GetActions();
         return getAction;
     }
     
@@ -126,7 +163,32 @@ public class GameState
         return playerPos;
     }
 
-  
+    public Vector3 GetStairPosition()
+    {
+        return stairPosition;
+    }
+
+    public List<Vector3> GetMummiesPosition()
+    {
+        return mummiesPos;
+    }
+
+    public void UpdatePlayer(Vector3 action)
+    {
+        playerPos += action;
+    }
+
+    public void UpdateMummy(Vector3 action, int index)
+    {
+        mummiesPos[index] += action;
+    }
+
+   public void Copy(GameState _state)
+    {
+        playerPos = _state.GetPlayerPosition();
+        mummiesPos = _state.GetMummiesPosition();
+
+    }
 }
 
 public class Node
@@ -187,7 +249,7 @@ public class AstarSearch
         this.startedPosition = startedPosition;
     }
     
-    public Vector3 GetActions()
+    public List<Vector3> GetActions()
     {
         Node start = new Node(startedPosition);
         List<Node> frontiers = new List<Node>();
@@ -196,9 +258,9 @@ public class AstarSearch
 
         if (isCatch(state, start.getPosition()))
         {
-            return Vector3.zero;
+            List<Vector3> zero = new List<Vector3>() { Vector3.zero };
+            return zero;
         }
-
 
         while (frontiers.Count != 0)
         {
@@ -209,7 +271,8 @@ public class AstarSearch
 
             if (isCatch(state, currentPos))
             {
-                return currentNode.getFirstDirection();
+                //return currentNode.getFirstDirection();
+                return currentNode.getTracePath();
             }
 
             closed.Add(currentPos);
@@ -232,7 +295,8 @@ public class AstarSearch
             }
         }
 
-        return Vector3.zero;
+
+        return start.getTracePath();
     }
 
     void update(List<Node> list, Node insertedNode)
@@ -286,3 +350,156 @@ public class AstarSearch
         return disManhatan;
     }
 }
+
+
+class Minimax
+{
+    GameState state;
+    int depth;
+  
+    public Minimax(GameState _state, int _depth)
+    {
+        state = new GameState(_state);
+        depth = _depth;
+    }
+
+    public Vector3 GetAction()
+    {
+        return (Vector3)MinimaxAgent(state, 0, 0)[1];
+        //return Vector3.left;
+    }
+
+    public ArrayList MinimaxAgent(GameState state, int _depth, int agentIndex)
+    {
+        Debug.Log(Mahattan(state.GetPlayerPosition(), state.GetStairPosition()));
+        ArrayList result = new ArrayList();
+        if (_depth == depth || IsLost(state) || IsWin(state))
+        {
+            
+            result.Add(EvaluationFunction(state));
+            result.Add(Vector3.zero);
+            return result;
+        }
+
+        int nextAgentIndex = 0;
+        if (agentIndex == state.GetMummiesPosition().Count)
+        {
+            nextAgentIndex = 0;
+            _depth += 1;
+        }
+        else
+        {
+            nextAgentIndex += agentIndex + 1;
+        }
+
+        Vector3[] directions = new Vector3[] { Vector3.left, Vector3.up, Vector3.right, Vector3.down };
+        foreach(Vector3 action in directions)
+        {
+            GameState nextState = new GameState(state);
+            
+            if(agentIndex == 0)
+            {
+                if(!state.isBlocked(action, state.GetPlayerPosition()))
+                {
+                    nextState.UpdatePlayer(action);
+                }
+                else
+                {
+                    continue;
+                }
+            }
+            else
+            {
+                if(!state.isBlocked(action, state.GetMummiesPosition()[agentIndex-1]))
+                { 
+                    nextState.UpdateMummy(action, agentIndex - 1);
+                }
+                else
+                {
+                    continue;
+                }
+            }
+            ArrayList value = MinimaxAgent(nextState, _depth, nextAgentIndex);
+
+            if (result.Count == 0)
+            {
+                result.Add(value[0]);
+                result.Add(action);
+            }
+            else
+            {
+                if(agentIndex == 0)
+                {
+                    if((int)result[0] < (int)value[0])
+                    {
+                        result[0] = value[0];
+                        result[1] = action;
+                    }
+                }
+                else
+                {
+                    if((int)result[0] > (int)value[0])
+                    {
+                        result[0] = value[0];
+                        result[1] = action;
+                    }
+                }
+            }
+            
+        }
+
+        return result;
+    }
+
+    int EvaluationFunction(GameState s)
+    {
+        int eval = 0;
+
+        eval += (-100) * Mahattan(s.GetPlayerPosition(), s.GetStairPosition());
+
+
+        foreach (Vector3 mumPos in s.GetMummiesPosition())
+        {
+            if ((s.GetPlayerPosition() == mumPos) || (Mahattan(s.GetPlayerPosition(), mumPos) == 0) || (Mahattan(s.GetPlayerPosition(), mumPos) == 1))
+            {
+                eval += -10000;
+            }
+            else
+            {
+                eval += (100) * Mahattan(s.GetPlayerPosition(), mumPos);
+            }
+
+        }
+
+        return eval;
+    }
+
+
+    int Mahattan(Vector3 position1, Vector3 position2)
+    {
+        int dis = (int)(Mathf.Abs(position1.x - position2.x) + Mathf.Abs(position1.y - position2.y) + Mathf.Abs(position1.z - position2.z));
+        return dis;
+    }
+
+
+    bool IsLost(GameState state)
+    {
+        foreach(Vector3 mumPos in state.GetMummiesPosition())
+        {
+            if(mumPos == state.GetPlayerPosition())
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    bool IsWin(GameState state)
+    {
+        if(state.GetStairPosition() == state.GetPlayerPosition())
+        {
+            return true;
+        }
+        return false;
+    }
+} 
