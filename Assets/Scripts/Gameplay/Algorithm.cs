@@ -503,3 +503,159 @@ class Minimax
         return false;
     }
 } 
+class Expectimax
+{
+    GameState state;
+    int depth;
+
+    public Expectimax(GameState _state, int _depth)
+    {
+        state = new GameState(_state);
+        depth = _depth;
+    }
+
+    public Vector3 GetAction()
+    {
+        return (Vector3)ExpectimaxAgent(state, 0, 0)[1];
+        //return Vector3.left;
+    }
+    
+
+    public ArrayList ExpectimaxAgent(GameState state, int _depth, int agentIndex)
+    {
+        //Debug.Log(Mahattan(state.GetPlayerPosition(), state.GetStairPosition()));
+        ArrayList result = new ArrayList();
+        if (_depth == depth || IsLost(state) || IsWin(state))
+        {
+            result.Add(EvaluationFunction(state));
+            result.Add(Vector3.zero);
+            return result;
+        }
+
+        int nextAgentIndex = 0;
+        if (agentIndex == state.GetMummiesPosition().Count) // number of mummies
+        {
+            nextAgentIndex = 0;
+            _depth += 1;
+        }
+        else
+        {
+            nextAgentIndex += agentIndex + 1;
+        }
+        var v_player = double.NegativeInfinity;
+        var direction = new Vector3();
+        var v_mummy = 0.0;
+        var numberofSuccessor = 0;
+        Vector3[] directions = new Vector3[] { Vector3.left, Vector3.up, Vector3.right, Vector3.down };
+
+
+        foreach (Vector3 action in directions)
+        {
+            GameState nextState = new GameState(state);
+
+            if (agentIndex == 0)
+            {
+                if (!state.isBlocked(action, state.GetPlayerPosition()))
+                {
+                    nextState.UpdatePlayer(action);
+                }
+                else
+                {
+                    continue;
+                }
+            }
+            else
+            {
+                if (!state.isBlocked(action, state.GetMummiesPosition()[agentIndex - 1]))
+                {
+                    nextState.UpdateMummy(action, agentIndex - 1);
+                }
+                else
+                {
+                    continue;
+                }
+            }
+            
+          
+            ArrayList value = ExpectimaxAgent(nextState, _depth, nextAgentIndex);
+
+            if (agentIndex == 0)
+            {
+                if (v_player < value[0])
+                {
+                    v_player = value[0];
+                    direction = action;
+                }
+            }
+            else
+            {
+                numberofSuccessor += 1;
+                v_mummy = v_mummy + value[0];
+            }
+        }
+        if (agentIndex != 0)
+        {
+            v_mummy = v_mummy / numberofSuccessor;
+            result.Add(v_mummy);
+            result.Add(Vector3.zero); // this Add is useless. Because we never know exactly where the mummy gonna go
+        }
+        else
+        {
+            result.Add(v_player);
+            result.Add(direction);
+        }
+        return result;
+    }
+
+    int EvaluationFunction(GameState s)
+    {
+        int eval = 0;
+
+        eval += (-100) * Mahattan(s.GetPlayerPosition(), s.GetStairPosition());
+
+
+        foreach (Vector3 mumPos in s.GetMummiesPosition())
+        {
+            if ((s.GetPlayerPosition() == mumPos) || (Mahattan(s.GetPlayerPosition(), mumPos) == 0) || (Mahattan(s.GetPlayerPosition(), mumPos) == 1))
+            {
+                eval += -10000;
+            }
+            else
+            {
+                eval += (100) * Mahattan(s.GetPlayerPosition(), mumPos);
+            }
+
+        }
+
+        return eval;
+    }
+
+
+    int Mahattan(Vector3 position1, Vector3 position2)
+    {
+        int dis = (int)(Mathf.Abs(position1.x - position2.x) + Mathf.Abs(position1.y - position2.y) + Mathf.Abs(position1.z - position2.z));
+        return dis;
+    }
+
+
+    bool IsLost(GameState state)
+    {
+        foreach (Vector3 mumPos in state.GetMummiesPosition())
+        {
+            if (mumPos == state.GetPlayerPosition())
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    bool IsWin(GameState state)
+    {
+        if (state.GetStairPosition() == state.GetPlayerPosition())
+        {
+            return true;
+        }
+        return false;
+    }
+}
