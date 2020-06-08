@@ -10,6 +10,7 @@ TagManager:
   - VerticalWall
   - WhiteMummy
   - RedMummy
+  - Hole
   layers:
   - Default
   - TransparentFX
