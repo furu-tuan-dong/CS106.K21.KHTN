@@ -8,6 +8,7 @@ public static class GameGlobal
     public static int level = 0;
 
     public static void Play(int lv) {
+        //Debug.Log(lv);
         level = lv;
         Restart();
     }

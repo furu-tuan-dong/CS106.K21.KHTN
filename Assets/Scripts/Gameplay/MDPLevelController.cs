@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using System;
 using UnityEngine;
+using System.Linq;
+
+
 public class MDPLevelController : MonoBehaviour
 {
     // Inspector
@@ -24,6 +27,11 @@ public class MDPLevelController : MonoBehaviour
     Vector3 stairDirection;
     bool restrictedVision = false;
 
+
+    // value iteration
+    int observation_space = 36;
+    int action_space = 4;
+    
     void Awake() {
         size = 6;
         idle = true;
@@ -74,6 +82,221 @@ public class MDPLevelController : MonoBehaviour
         }
     }
 
+
+    Array Value_iteration(int max_iter, double gamma = 0.9)
+    {
+       
+        double[] v_values = new double[observation_space];
+        Array.Clear(v_values, 0, v_values.Length); // set the v_values array to 0
+
+        for (int i = 0; i < max_iter; i++)
+        {
+            double[] pre_v_values = new double[observation_space];
+            Array.Copy(v_values, 0, pre_v_values, 0, observation_space);
+            for (int state = 0; state < observation_space; state++)
+            {
+                Vector3 cur_pos = new Vector3
+                {
+                    x = state % 6
+                };
+                if (state >= 30 && state <= 35) cur_pos.y = 0;
+                else if (state >= 24 && state <= 29) cur_pos.y = 1;
+                else if (state >= 18 && state <= 23) cur_pos.y = 2;
+                else if (state >= 12 && state <= 17) cur_pos.y = 3;
+                else if (state >= 6 && state <= 11) cur_pos.y = 4;
+                else if (state >= 0 && state <= 5) cur_pos.y = 5;
+                
+
+                double[] q_values = new double[action_space];
+                Array.Clear(q_values, 0, q_values.Length);
+                double q_value = 0.0;
+                if (state == 5 || state == 12 || state == 35 || state == 0)
+                {
+                    q_value = 1.0 * (0.0 + gamma * pre_v_values[state]);
+                    q_values[0] = q_value;
+                    for (int tmp = 1; tmp < 4; tmp++) q_values[tmp] = 0;
+                }
+                else
+                {
+                    for (int action = 0; action < action_space; action++)
+                    {
+                        q_value = 0.0;
+                        int[] possible_actions = new int[3];
+
+                        /// 0 : UP
+                        /// 1 : RIGHT
+                        /// 2 : DOWN
+                        /// 3 : LEFT
+                        if (action == 0) { possible_actions[0] = 0; possible_actions[1] = 3; possible_actions[2] = 1; }
+                        if (action == 1) { possible_actions[0] = 1; possible_actions[1] = 0; possible_actions[2] = 2; }
+                        if (action == 2) { possible_actions[0] = 2; possible_actions[1] = 1; possible_actions[2] = 3; }
+                        if (action == 3) { possible_actions[0] = 3; possible_actions[1] = 2; possible_actions[2] = 0; }
+
+                        for (int possible_action = 0; possible_action < possible_actions.Length; possible_action++)
+                        {
+                            int next_state = 0;
+                            switch (possible_actions[possible_action])
+                            {
+                                case 0:
+                                    if (Blocked(cur_pos, Vector3.up) || (state - 6 < 0))
+                                        next_state = state;
+                                    else
+                                        next_state = state - 6;
+                                    break;
+                                case 1:
+                                    if (Blocked(cur_pos, Vector3.right) || (((state + 1) % 6) == 0))
+                                        next_state = state;
+                                    else
+                                        next_state = state + 1;
+                                    break;
+                                case 2:
+                                    if (Blocked(cur_pos, Vector3.down) || (state + 6 > 35))
+                                        next_state = state;
+                                    else
+                                        next_state = state + 6;
+                                    break;
+                                case 3:
+                                    if (Blocked(cur_pos, Vector3.left) || ((state % 6) == 0))
+                                        next_state = state;
+                                    else
+                                        next_state = state - 1;
+                                    break;
+
+                            }
+
+                            double reward = 0.0;
+                            if (next_state == 5 || next_state == 12 || next_state == 35)
+                                reward = -1.0;
+                            else
+                            {
+                                if (next_state == 0) reward = 1.0;
+                            }
+
+                            if (possible_action == 0)
+                                q_value += 0.8 * (reward + gamma * pre_v_values[next_state]);
+
+                            else
+                                q_value += 0.1 * (reward + gamma * pre_v_values[next_state]);
+
+                        }
+                        q_values[action] = q_value;
+
+                    }
+                }
+                //int best_action = Array.IndexOf(q_values, q_values.Max());
+                v_values[state] = q_values.Max();
+
+            }
+            if (Enumerable.SequenceEqual(v_values, pre_v_values))
+                break;
+        
+        }
+
+        return v_values;
+    }
+
+
+    Array Policy_extraction(double []v_values, double gamma = 0.9)
+    {
+        double[] policy = new double[observation_space];
+        Array.Clear(policy, 0, policy.Length); // set the v_values array to 0
+        for (int state = 0; state < observation_space; state++)
+        {
+            double[] q_values = new double[action_space];
+            double q_value = 0.0;
+            /// get current position
+            Vector3 cur_pos = new Vector3
+            {
+                x = state % 6
+            };
+            if (state >= 30 && state <= 35) cur_pos.y = 0;
+            else if (state >= 24 && state <= 29) cur_pos.y = 1;
+            else if (state >= 18 && state <= 23) cur_pos.y = 2;
+            else if (state >= 12 && state <= 17) cur_pos.y = 3;
+            else if (state >= 6 && state <= 11) cur_pos.y = 4;
+            else if (state >= 0 && state <= 5) cur_pos.y = 5;
+            ///
+            if (state == 5 || state == 12 || state == 35 || state == 0)
+            {
+                q_value = 1.0 * (0.0 + gamma * v_values[state]);
+                q_values[0] = q_value;
+                for (int tmp = 1; tmp < 4; tmp++) q_values[tmp] = 0;
+            }
+            else
+            {
+                for (int action = 0; action < action_space; action++)
+                {
+                    q_value = 0.0;
+                    int[] possible_actions = new int[3];
+
+                    /// 0 : UP
+                    /// 1 : RIGHT
+                    /// 2 : DOWN
+                    /// 3 : LEFT
+                    if (action == 0) { possible_actions[0] = 0; possible_actions[1] = 3; possible_actions[2] = 1; }
+                    if (action == 1) { possible_actions[0] = 1; possible_actions[1] = 0; possible_actions[2] = 2; }
+                    if (action == 2) { possible_actions[0] = 2; possible_actions[1] = 1; possible_actions[2] = 3; }
+                    if (action == 3) { possible_actions[0] = 3; possible_actions[1] = 2; possible_actions[2] = 0; }
+
+                    for (int possible_action = 0; possible_action < possible_actions.Length; possible_action++)
+                    {
+                        int next_state = 0;
+                        switch (possible_actions[possible_action])
+                        {
+                            case 0:
+                                if (Blocked(cur_pos, Vector3.up) || (state - 6 < 0))
+                                    next_state = state;
+                                else
+                                    next_state = state - 6;
+                                break;
+                            case 1:
+                                if (Blocked(cur_pos, Vector3.right) || (((state + 1) % 6) == 0))
+                                    next_state = state;
+                                else
+                                    next_state = state + 1;
+                                break;
+                            case 2:
+                                if (Blocked(cur_pos, Vector3.down) || (state + 6 > 35))
+                                    next_state = state;
+                                else
+                                    next_state = state + 6;
+                                break;
+                            case 3:
+                                if (Blocked(cur_pos, Vector3.left) || ((state % 6) == 0))
+                                    next_state = state;
+                                else
+                                    next_state = state - 1;
+                                break;
+
+                        }
+
+                        double reward = 0.0;
+                        if (next_state == 5 || next_state == 12 || next_state == 35)
+                            reward = -1.0;
+                        else
+                        {
+                            if (next_state == 0) reward = 1.0;
+                        }
+
+                        if (possible_action == 0)
+                            q_value += 0.8 * (reward + gamma * v_values[next_state]);
+
+                        else
+                            q_value += 0.1 * (reward + gamma * v_values[next_state]);
+
+                    }
+                    q_values[action] = q_value;
+
+                }
+            }
+            int best_action = Array.IndexOf(q_values, q_values.Max());
+            policy[state] = best_action;
+
+        }
+   
+        return policy;
+    }
+
     // Update is called once per frame
     void Update()
     {
@@ -86,10 +309,16 @@ public class MDPLevelController : MonoBehaviour
         else if (Input.GetKeyDown("right")) direction = Vector3.right;
 
         direction = getDirectionForAgent(direction, probability);
+        //double[] value_iter = new double[observation_space];
+        //Array.Copy(Value_iteration(1000), 0, value_iter, 0, observation_space);
+        //Policy_extraction(value_iter);
 
         if (direction != Vector3.zero)
             StartCoroutine(Action(direction));
     }
+
+    
+
     Vector3 getDirectionForAgent(Vector3 inputDirection, double probForInput){
         if (inputDirection == Vector3.zero) return inputDirection;
         Vector3 returnDirection;

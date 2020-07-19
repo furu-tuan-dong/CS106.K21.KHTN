@@ -159,16 +159,20 @@ public class LevelController : MonoBehaviour
         int py = (int) position.y;
         int pz = (int) position.z;
 
-        if (x > px) {
-            if (!Blocked(position, Vector3.right)) return Vector3.right;
-        }
-        if (x < px) {
-            if (!Blocked(position, Vector3.left)) return Vector3.left;
-        }
-        if (y > py) return Vector3.up;
-        if (y < py) return Vector3.down;
-        if (x > px) return Vector3.right;
-        if (x < px) return Vector3.left;
+        //if (x > px) {
+        //    if (!Blocked(position, Vector3.right)) return Vector3.right;
+        //}
+        //if (x < px) {
+        //    if (!Blocked(position, Vector3.left)) return Vector3.left;
+        //}
+        //if (y > py) return Vector3.up;
+        //if (y < py) return Vector3.down;
+        //if (x > px) return Vector3.right;
+        //if (x < px) return Vector3.left;
+
+        //return Vector3.zero;
+        
+
 
         return Vector3.zero;
     }
