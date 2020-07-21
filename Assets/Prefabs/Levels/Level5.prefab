@@ -1,5 +1,30 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!114 &1415547219797606210
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4313024558979485629}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 121d5ab0d62874576b83fb5d020a6c3e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Select_Algorithm: 3
+  winOverlay: {fileID: 3777023862954251493, guid: b56334d5a26560d46b6d295b9725a4b6,
+    type: 3}
+  loseOverlay: {fileID: 6419117505728361425, guid: ccef3f73e83f286499864e76eb866c96,
+    type: 3}
+  dust_effect: {fileID: 4969925174467188208, guid: 5364adf705c267842a92caf72c89b6ea,
+    type: 3}
+  defeat_effect: {fileID: 3333509127615787088, guid: 0ca9c735194354748ba1c955fa135fd8,
+    type: 3}
+  idle: 0
+  player: {fileID: 0}
+  mummies: []
+  size: 0
 --- !u!1001 &483727664758331890
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -76,11 +101,6 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 4313024558979485630}
     m_Modifications:
-    - target: {fileID: 5289100490368543035, guid: 14e8d85fd35fe0d4fa3731c7ca8f84ad,
-        type: 3}
-      propertyPath: m_Name
-      value: HorizontalWall1
-      objectReference: {fileID: 0}
     - target: {fileID: 5289100490368543034, guid: 14e8d85fd35fe0d4fa3731c7ca8f84ad,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -135,6 +155,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5289100490368543035, guid: 14e8d85fd35fe0d4fa3731c7ca8f84ad,
+        type: 3}
+      propertyPath: m_Name
+      value: HorizontalWall1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 14e8d85fd35fe0d4fa3731c7ca8f84ad, type: 3}
@@ -283,11 +308,6 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 4313024558979485630}
     m_Modifications:
-    - target: {fileID: 5289100490368543035, guid: 14e8d85fd35fe0d4fa3731c7ca8f84ad,
-        type: 3}
-      propertyPath: m_Name
-      value: HorizontalWall3
-      objectReference: {fileID: 0}
     - target: {fileID: 5289100490368543034, guid: 14e8d85fd35fe0d4fa3731c7ca8f84ad,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -343,6 +363,11 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5289100490368543035, guid: 14e8d85fd35fe0d4fa3731c7ca8f84ad,
+        type: 3}
+      propertyPath: m_Name
+      value: HorizontalWall3
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 14e8d85fd35fe0d4fa3731c7ca8f84ad, type: 3}
 --- !u!1001 &2366718522996234142
@@ -352,11 +377,6 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 1946317039891453987, guid: 79e8bc0b07302124887c09dd3dc539fa,
-        type: 3}
-      propertyPath: m_Name
-      value: Level5
-      objectReference: {fileID: 0}
     - target: {fileID: 1946317039891453984, guid: 79e8bc0b07302124887c09dd3dc539fa,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -412,8 +432,20 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    - target: {fileID: 1946317039891453987, guid: 79e8bc0b07302124887c09dd3dc539fa,
+        type: 3}
+      propertyPath: m_Name
+      value: Level5
+      objectReference: {fileID: 0}
+    m_RemovedComponents:
+    - {fileID: 8951317409067512872, guid: 79e8bc0b07302124887c09dd3dc539fa, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: 79e8bc0b07302124887c09dd3dc539fa, type: 3}
+--- !u!1 &4313024558979485629 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1946317039891453987, guid: 79e8bc0b07302124887c09dd3dc539fa,
+    type: 3}
+  m_PrefabInstance: {fileID: 2366718522996234142}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &4313024558979485630 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1946317039891453984, guid: 79e8bc0b07302124887c09dd3dc539fa,
@@ -703,11 +735,6 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 4313024558979485630}
     m_Modifications:
-    - target: {fileID: 5289100490368543035, guid: 14e8d85fd35fe0d4fa3731c7ca8f84ad,
-        type: 3}
-      propertyPath: m_Name
-      value: HorizontalWall2
-      objectReference: {fileID: 0}
     - target: {fileID: 5289100490368543034, guid: 14e8d85fd35fe0d4fa3731c7ca8f84ad,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -762,6 +789,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5289100490368543035, guid: 14e8d85fd35fe0d4fa3731c7ca8f84ad,
+        type: 3}
+      propertyPath: m_Name
+      value: HorizontalWall2
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 14e8d85fd35fe0d4fa3731c7ca8f84ad, type: 3}
@@ -1048,11 +1080,6 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 4313024558979485630}
     m_Modifications:
-    - target: {fileID: 5289100490368543035, guid: 14e8d85fd35fe0d4fa3731c7ca8f84ad,
-        type: 3}
-      propertyPath: m_Name
-      value: HorizontalWall4
-      objectReference: {fileID: 0}
     - target: {fileID: 5289100490368543034, guid: 14e8d85fd35fe0d4fa3731c7ca8f84ad,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -1107,6 +1134,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5289100490368543035, guid: 14e8d85fd35fe0d4fa3731c7ca8f84ad,
+        type: 3}
+      propertyPath: m_Name
+      value: HorizontalWall4
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 14e8d85fd35fe0d4fa3731c7ca8f84ad, type: 3}

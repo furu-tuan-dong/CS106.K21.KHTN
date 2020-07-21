@@ -48,6 +48,7 @@ SpriteRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -59,6 +60,7 @@ SpriteRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
@@ -141,5 +143,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 124189b062119794d98cac562e6b040c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  texture: {fileID: 0}
   hoverTexture: {fileID: 21300000, guid: 9357bc8742148a3449b729048556d58d, type: 3}
   downTexture: {fileID: 21300000, guid: 908e2f3ea6c12914c84cbbf48d76e0de, type: 3}

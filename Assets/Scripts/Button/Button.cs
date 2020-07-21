@@ -19,25 +19,29 @@ public class Button : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+
     }
 
-    void OnMouseEnter() {
+    void OnMouseEnter()
+    {
         if (render.sprite == texture)
             render.sprite = hoverTexture;
     }
 
-    void OnMouseExit() {
+    void OnMouseExit()
+    {
         if (render.sprite == hoverTexture)
             render.sprite = texture;
     }
 
-    void OnMouseDown() {
+    void OnMouseDown()
+    {
         if (downTexture != null)
             render.sprite = downTexture;
     }
 
-    void OnMouseUp() {
+    void OnMouseUp()
+    {
         if (downTexture != null)
             render.sprite = texture;
     }

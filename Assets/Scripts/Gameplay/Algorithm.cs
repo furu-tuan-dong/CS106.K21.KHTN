@@ -28,6 +28,7 @@ public class GameState
     Vector3 stairPosition;
     //AI_Controller control = new AI_Controller();
     int numMummies;
+    int select_algorithm;
 
     public GameState() { }
 
@@ -48,7 +49,7 @@ public class GameState
     }
 
     public GameState(Character player, List<Character> mummies, int size,
-        int[,] verticalWall, int[,] horizontalWall, Vector3 stairPosition)
+        int[,] verticalWall, int[,] horizontalWall, Vector3 stairPosition, int algorithm)
     {
         this.player = player;
         playerPos = player.transform.localPosition;
@@ -58,6 +59,7 @@ public class GameState
         this.verticalWall = verticalWall;
         this.horizontalWall = horizontalWall;
         this.stairPosition = stairPosition;
+        this.select_algorithm = algorithm;
 
         foreach (Character mummy in mummies)
         {
@@ -96,10 +98,23 @@ public class GameState
     }
     Vector3 PlayerMove()
     {
-        //Minimax action = new Minimax(this, 3);
-        //return action.GetAction();
-        Expectimax action = new Expectimax(this, 3);
-        return action.GetAction();
+        Vector3 action_ = Vector3.zero;
+        if(select_algorithm == 1)
+        {
+            Minimax action = new Minimax(this, 3);
+            action_ = action.GetAction();
+        }
+        else if (select_algorithm == 2)
+        {
+            Expectimax action = new Expectimax(this, 3);
+            action_ = action.GetAction();
+        }
+        else if (select_algorithm == 3)
+        {
+            AlphaBeta action = new AlphaBeta(this, 4);
+            action_ = action.GetAction();
+        }
+        return action_;
     }
 
     void MummiesMove(List<Vector3[]> result)
@@ -505,6 +520,191 @@ class Minimax
         return false;
     }
 }
+
+class AlphaBeta
+{
+    GameState state;
+    int depth;
+
+    public AlphaBeta(GameState _state, int _depth)
+    {
+        state = new GameState(_state);
+        depth = _depth;
+    }
+
+    public Vector3 GetAction()
+    {
+        int alpha = int.MinValue;
+        int beta = int.MaxValue;
+        return (Vector3)AlphaBetaAgent(state, 0, 0, alpha, beta)[1];
+        //return Vector3.left;
+    }
+
+    public ArrayList AlphaBetaAgent(GameState state, int _depth, int agentIndex, int alpha, int beta)
+    {
+        ArrayList result = new ArrayList();
+        if (_depth == depth || IsLost(state) || IsWin(state))
+        {
+
+            result.Add(EvaluationFunction(state));
+            result.Add(Vector3.zero);
+            return result;
+        }
+
+        int nextAgentIndex = 0;
+        if (agentIndex == state.GetMummiesPosition().Count)
+        {
+            nextAgentIndex = 0;
+            _depth += 1;
+        }
+        else
+        {
+            nextAgentIndex += agentIndex + 1;
+        }
+
+        Vector3[] directions = new Vector3[] { Vector3.left, Vector3.up, Vector3.right, Vector3.down };
+        foreach (Vector3 action in directions)
+        {
+            GameState nextState = new GameState(state);
+
+            if (agentIndex == 0)
+            {
+                if (!state.isBlocked(action, state.GetPlayerPosition()))
+                {
+                    nextState.UpdatePlayer(action);
+                }
+                else
+                {
+                    continue;
+                }
+            }
+            else
+            {
+                if (!state.isBlocked(action, state.GetMummiesPosition()[agentIndex - 1]))
+                {
+                    nextState.UpdateMummy(action, agentIndex - 1);
+                }
+                else
+                {
+                    continue;
+                }
+            }
+
+            if (result.Count == 0)
+            {
+                ArrayList value = AlphaBetaAgent(nextState, _depth, nextAgentIndex, alpha, beta);
+                result.Add(value[0]);
+                result.Add(action);
+                if (agentIndex == 0)
+                {
+                    alpha = Math.Max(alpha, (int)result[0]);
+                }
+                else
+                {
+                    beta = Math.Min(beta, (int)result[0]);
+                }
+            }
+            else
+            {
+                if ((int)result[0] > beta && agentIndex == 0)
+                {
+                    break;
+                }
+
+                if ((int)result[0] < alpha && agentIndex != 0)
+                {
+                    break;
+                }
+
+                ArrayList value = AlphaBetaAgent(nextState, _depth, nextAgentIndex, alpha, beta);
+
+                if (agentIndex == 0)
+                {
+                    if ((int)value[0] > (int)result[0])
+                    {
+                        result[0] = value[0];
+                        result[1] = action;
+                        alpha = Math.Max(alpha, (int)result[0]);
+                    }
+
+                }
+                else
+                {
+                    if ((int)result[0] > (int)value[0])
+                    {
+                        result[0] = value[0];
+                        result[1] = action;
+                        beta = Math.Min(beta, (int)result[0]);
+                    }
+                }
+            }
+
+        }
+
+        return result;
+    }
+
+    int EvaluationFunction(GameState s)
+    {
+        int eval = 0;
+
+        eval += (-10) * Mahattan(s.GetPlayerPosition(), s.GetStairPosition());
+
+
+        foreach (Vector3 mumPos in s.GetMummiesPosition())
+        {
+            if (Mahattan(s.GetPlayerPosition(), mumPos) == 0)
+            {
+                eval += -10000;
+            }
+            else if (Mahattan(s.GetPlayerPosition(), mumPos) == 1)
+            {
+                eval += -5000;
+            }
+            else if (Mahattan(s.GetPlayerPosition(), mumPos) == 2)
+            {
+                eval += -1000;
+            }
+            else
+            {
+                eval += (100) * Mahattan(s.GetPlayerPosition(), mumPos);
+            }
+
+        }
+
+        return eval;
+    }
+
+
+    int Mahattan(Vector3 position1, Vector3 position2)
+    {
+        int dis = (int)(Mathf.Abs(position1.x - position2.x) + Mathf.Abs(position1.y - position2.y) + Mathf.Abs(position1.z - position2.z));
+        return dis;
+    }
+
+
+    bool IsLost(GameState state)
+    {
+        foreach (Vector3 mumPos in state.GetMummiesPosition())
+        {
+            if (mumPos == state.GetPlayerPosition())
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    bool IsWin(GameState state)
+    {
+        if (state.GetStairPosition() == state.GetPlayerPosition())
+        {
+            return true;
+        }
+        return false;
+    }
+}
+
 class Expectimax
 {
     GameState state;

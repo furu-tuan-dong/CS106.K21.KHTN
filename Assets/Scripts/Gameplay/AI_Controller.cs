@@ -10,7 +10,9 @@ public class AI_Controller : MonoBehaviour
         public List<Vector3> mummies = new List<Vector3>();
     }
 
-    
+    // Select algorithm
+    public int Select_Algorithm;
+
     // Inspector
     public GameObject winOverlay;
     public GameObject loseOverlay;
@@ -87,7 +89,7 @@ public class AI_Controller : MonoBehaviour
             }
         }
 
-        controlState = new GameState(player, mummies, size, verticalWall, horizontalWall, stairPosition);
+        controlState = new GameState(player, mummies, size, verticalWall, horizontalWall, stairPosition, Select_Algorithm);
     }
 
     
