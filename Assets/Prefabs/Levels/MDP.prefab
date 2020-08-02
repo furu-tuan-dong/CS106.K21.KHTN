@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 435562892}
   - component: {fileID: 435562893}
   m_Layer: 0
-  m_Name: MDP_Level1
+  m_Name: MDP
   m_TagString: Map
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -26,7 +26,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 435562891}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -1.79, y: -3.33, z: 0}
+  m_LocalPosition: {x: -1.2, y: -3.43, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 5289100492044042242}
@@ -65,6 +65,7 @@ SpriteRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -76,6 +77,7 @@ SpriteRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
@@ -203,11 +205,6 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 435562890}
     m_Modifications:
-    - target: {fileID: 5289100490368543035, guid: 14e8d85fd35fe0d4fa3731c7ca8f84ad,
-        type: 3}
-      propertyPath: m_Name
-      value: HorizontalWall2
-      objectReference: {fileID: 0}
     - target: {fileID: 5289100490368543034, guid: 14e8d85fd35fe0d4fa3731c7ca8f84ad,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -262,6 +259,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5289100490368543035, guid: 14e8d85fd35fe0d4fa3731c7ca8f84ad,
+        type: 3}
+      propertyPath: m_Name
+      value: HorizontalWall2
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 14e8d85fd35fe0d4fa3731c7ca8f84ad, type: 3}
@@ -503,11 +505,6 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 435562890}
     m_Modifications:
-    - target: {fileID: 5289100490368543035, guid: 14e8d85fd35fe0d4fa3731c7ca8f84ad,
-        type: 3}
-      propertyPath: m_Name
-      value: HorizontalWall6
-      objectReference: {fileID: 0}
     - target: {fileID: 5289100490368543034, guid: 14e8d85fd35fe0d4fa3731c7ca8f84ad,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -562,6 +559,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5289100490368543035, guid: 14e8d85fd35fe0d4fa3731c7ca8f84ad,
+        type: 3}
+      propertyPath: m_Name
+      value: HorizontalWall6
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 14e8d85fd35fe0d4fa3731c7ca8f84ad, type: 3}
@@ -728,11 +730,6 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 435562890}
     m_Modifications:
-    - target: {fileID: 5289100490368543035, guid: 14e8d85fd35fe0d4fa3731c7ca8f84ad,
-        type: 3}
-      propertyPath: m_Name
-      value: HorizontalWall5
-      objectReference: {fileID: 0}
     - target: {fileID: 5289100490368543034, guid: 14e8d85fd35fe0d4fa3731c7ca8f84ad,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -787,6 +784,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5289100490368543035, guid: 14e8d85fd35fe0d4fa3731c7ca8f84ad,
+        type: 3}
+      propertyPath: m_Name
+      value: HorizontalWall5
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 14e8d85fd35fe0d4fa3731c7ca8f84ad, type: 3}
@@ -878,11 +880,6 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 435562890}
     m_Modifications:
-    - target: {fileID: 5289100490368543035, guid: 14e8d85fd35fe0d4fa3731c7ca8f84ad,
-        type: 3}
-      propertyPath: m_Name
-      value: HorizontalWall3
-      objectReference: {fileID: 0}
     - target: {fileID: 5289100490368543034, guid: 14e8d85fd35fe0d4fa3731c7ca8f84ad,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -937,6 +934,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5289100490368543035, guid: 14e8d85fd35fe0d4fa3731c7ca8f84ad,
+        type: 3}
+      propertyPath: m_Name
+      value: HorizontalWall3
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 14e8d85fd35fe0d4fa3731c7ca8f84ad, type: 3}
@@ -1028,16 +1030,6 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 435562890}
     m_Modifications:
-    - target: {fileID: 7750510191395938292, guid: 3fe44985772cd4a0195ead40320db403,
-        type: 3}
-      propertyPath: m_Name
-      value: hole2
-      objectReference: {fileID: 0}
-    - target: {fileID: 7750510191395938292, guid: 3fe44985772cd4a0195ead40320db403,
-        type: 3}
-      propertyPath: m_TagString
-      value: Hole
-      objectReference: {fileID: 0}
     - target: {fileID: 7612704689182389561, guid: 3fe44985772cd4a0195ead40320db403,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -1093,6 +1085,16 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7750510191395938292, guid: 3fe44985772cd4a0195ead40320db403,
+        type: 3}
+      propertyPath: m_Name
+      value: hole2
+      objectReference: {fileID: 0}
+    - target: {fileID: 7750510191395938292, guid: 3fe44985772cd4a0195ead40320db403,
+        type: 3}
+      propertyPath: m_TagString
+      value: Hole
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 3fe44985772cd4a0195ead40320db403, type: 3}
 --- !u!4 &7612704690213322221 stripped
@@ -1108,16 +1110,6 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 435562890}
     m_Modifications:
-    - target: {fileID: 7750510191395938292, guid: 3fe44985772cd4a0195ead40320db403,
-        type: 3}
-      propertyPath: m_Name
-      value: hole3
-      objectReference: {fileID: 0}
-    - target: {fileID: 7750510191395938292, guid: 3fe44985772cd4a0195ead40320db403,
-        type: 3}
-      propertyPath: m_TagString
-      value: Hole
-      objectReference: {fileID: 0}
     - target: {fileID: 7612704689182389561, guid: 3fe44985772cd4a0195ead40320db403,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -1173,6 +1165,16 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7750510191395938292, guid: 3fe44985772cd4a0195ead40320db403,
+        type: 3}
+      propertyPath: m_Name
+      value: hole3
+      objectReference: {fileID: 0}
+    - target: {fileID: 7750510191395938292, guid: 3fe44985772cd4a0195ead40320db403,
+        type: 3}
+      propertyPath: m_TagString
+      value: Hole
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 3fe44985772cd4a0195ead40320db403, type: 3}
 --- !u!4 &7612704689987882458 stripped
@@ -1188,11 +1190,6 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 435562890}
     m_Modifications:
-    - target: {fileID: 5289100490368543035, guid: 14e8d85fd35fe0d4fa3731c7ca8f84ad,
-        type: 3}
-      propertyPath: m_Name
-      value: HorizontalWall4
-      objectReference: {fileID: 0}
     - target: {fileID: 5289100490368543034, guid: 14e8d85fd35fe0d4fa3731c7ca8f84ad,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -1248,6 +1245,11 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5289100490368543035, guid: 14e8d85fd35fe0d4fa3731c7ca8f84ad,
+        type: 3}
+      propertyPath: m_Name
+      value: HorizontalWall4
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 14e8d85fd35fe0d4fa3731c7ca8f84ad, type: 3}
 --- !u!4 &5289100491786427966 stripped
@@ -1263,11 +1265,6 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 435562890}
     m_Modifications:
-    - target: {fileID: 5289100490368543035, guid: 14e8d85fd35fe0d4fa3731c7ca8f84ad,
-        type: 3}
-      propertyPath: m_Name
-      value: HorizontalWall1
-      objectReference: {fileID: 0}
     - target: {fileID: 5289100490368543034, guid: 14e8d85fd35fe0d4fa3731c7ca8f84ad,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -1323,6 +1320,11 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5289100490368543035, guid: 14e8d85fd35fe0d4fa3731c7ca8f84ad,
+        type: 3}
+      propertyPath: m_Name
+      value: HorizontalWall1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 14e8d85fd35fe0d4fa3731c7ca8f84ad, type: 3}
 --- !u!4 &5289100492044042242 stripped
@@ -1338,11 +1340,6 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 435562890}
     m_Modifications:
-    - target: {fileID: 5289100490368543035, guid: 14e8d85fd35fe0d4fa3731c7ca8f84ad,
-        type: 3}
-      propertyPath: m_Name
-      value: HorizontalWall4
-      objectReference: {fileID: 0}
     - target: {fileID: 5289100490368543034, guid: 14e8d85fd35fe0d4fa3731c7ca8f84ad,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -1397,6 +1394,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5289100490368543035, guid: 14e8d85fd35fe0d4fa3731c7ca8f84ad,
+        type: 3}
+      propertyPath: m_Name
+      value: HorizontalWall4
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 14e8d85fd35fe0d4fa3731c7ca8f84ad, type: 3}
@@ -1475,12 +1477,6 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: c028299839639c344bb46405b777c752, type: 3}
---- !u!4 &879194809011169191 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 879194808786717837, guid: c028299839639c344bb46405b777c752,
-    type: 3}
-  m_PrefabInstance: {fileID: 2103700266}
-  m_PrefabAsset: {fileID: 0}
 --- !u!114 &879194809011169189 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 879194808786717839, guid: c028299839639c344bb46405b777c752,
@@ -1493,6 +1489,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d3af2f522cdc6847ad5dba757ca3ba4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!4 &879194809011169191 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 879194808786717837, guid: c028299839639c344bb46405b777c752,
+    type: 3}
+  m_PrefabInstance: {fileID: 2103700266}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1071861711718811891
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1500,16 +1502,6 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 435562890}
     m_Modifications:
-    - target: {fileID: 7750510191395938292, guid: 3fe44985772cd4a0195ead40320db403,
-        type: 3}
-      propertyPath: m_Name
-      value: hole1
-      objectReference: {fileID: 0}
-    - target: {fileID: 7750510191395938292, guid: 3fe44985772cd4a0195ead40320db403,
-        type: 3}
-      propertyPath: m_TagString
-      value: Hole
-      objectReference: {fileID: 0}
     - target: {fileID: 7612704689182389561, guid: 3fe44985772cd4a0195ead40320db403,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -1564,6 +1556,16 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7750510191395938292, guid: 3fe44985772cd4a0195ead40320db403,
+        type: 3}
+      propertyPath: m_Name
+      value: hole1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7750510191395938292, guid: 3fe44985772cd4a0195ead40320db403,
+        type: 3}
+      propertyPath: m_TagString
+      value: Hole
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 3fe44985772cd4a0195ead40320db403, type: 3}

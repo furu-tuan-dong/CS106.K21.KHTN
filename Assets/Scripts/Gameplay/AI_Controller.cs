@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using System.Diagnostics;
 
 public class AI_Controller : MonoBehaviour
 {
@@ -12,6 +13,8 @@ public class AI_Controller : MonoBehaviour
 
     // Select algorithm
     public int Select_Algorithm;
+
+    public int Depth;
 
     // Inspector
     public GameObject winOverlay;
@@ -35,6 +38,9 @@ public class AI_Controller : MonoBehaviour
 
 
     List<Vector3[]> actions = new List<Vector3[]>();
+
+    //Counting time
+    Stopwatch time;
 
 
     void Awake() {
@@ -84,12 +90,12 @@ public class AI_Controller : MonoBehaviour
                     horizontalWall[x, y] = 1;
                     break;
                 default:
-                    Debug.Log("Unexpected game object with tag: " + t.tag);
+                    UnityEngine.Debug.Log("Unexpected game object with tag: " + t.tag);
                     break;
             }
         }
 
-        controlState = new GameState(player, mummies, size, verticalWall, horizontalWall, stairPosition, Select_Algorithm);
+        controlState = new GameState(player, mummies, size, verticalWall, horizontalWall, stairPosition, Select_Algorithm, Depth);
     }
 
     
@@ -101,29 +107,13 @@ public class AI_Controller : MonoBehaviour
             return;
         }
 
-        //Vector3 direction = Vector3.zero;
-
-        //if (Input.GetKeyDown("up")) direction = Vector3.up;
-        //else if (Input.GetKeyDown("down")) direction = Vector3.down;
-        //else if (Input.GetKeyDown("left")) direction = Vector3.left;
-        //else if (Input.GetKeyDown("right")) direction = Vector3.right;
-        //if (Input.GetButtonDown("Action"))
-        //{
-        //    StartCoroutine(Action());
-        //}
         StartCoroutine(Action());
-
-
-        //direction = actions[i]
-        
-
-        //if (direction != Vector3.zero)
-        //{
-        //    StartCoroutine(Action(direction));
-        //}
     }
 
-    public IEnumerator Action() {
+    public IEnumerator Action() 
+    {
+        time = new Stopwatch();
+        time.Start();
 
         actions = controlState.Action();
         if (actions.Count == 0) yield break;
@@ -164,7 +154,11 @@ public class AI_Controller : MonoBehaviour
     }
 
     // Win and lose
-    IEnumerator Victory() {
+    IEnumerator Victory() 
+    {
+        time.Stop();
+        UnityEngine.Debug.Log($"{time.ElapsedMilliseconds} ms");
+
         yield return player.Move(stairDirection, false);
 
         Destroy(player.gameObject);
@@ -176,7 +170,11 @@ public class AI_Controller : MonoBehaviour
 
     }
 
-    IEnumerator Lost() {
+    IEnumerator Lost()
+    {
+        time.Stop();
+        UnityEngine.Debug.Log($"{time.ElapsedMilliseconds} ms");
+
         Vector3 position = player.transform.localPosition;
 
         Destroy(player.gameObject);
@@ -187,7 +185,7 @@ public class AI_Controller : MonoBehaviour
         yield return RunEffect(dust_effect, position, true);
 
         yield return new WaitForSeconds(0.5f);
-        Instantiate(loseOverlay, transform, true);
+        Instantiate(loseOverlay, transform, true);    
     }
 
     IEnumerator MummiesMove(List<Vector3[]> actions) {
@@ -243,7 +241,7 @@ public class AI_Controller : MonoBehaviour
         foreach (var item in positions)
         {
             if (item.Value.Count == 1) continue;
-
+            
             // Preserve one
             item.Value.RemoveAt(0);
             foreach (var mummy in item.Value)

@@ -13,7 +13,7 @@ public class MDPLevelController : MonoBehaviour
     public GameObject dust_effect;
 
     // Internal
-    public double probability = 0.8;
+    public double probability = 0.4;
     public bool idle;
     public Character player;
 
@@ -178,10 +178,10 @@ public class MDPLevelController : MonoBehaviour
                             }
 
                             if (possible_action == 0)
-                                q_value += 0.8 * (reward + gamma * pre_v_values[next_state]);
+                                q_value += 0.4 * (reward + gamma * pre_v_values[next_state]);
 
                             else
-                                q_value += 0.1 * (reward + gamma * pre_v_values[next_state]);
+                                q_value += 0.3 * (reward + gamma * pre_v_values[next_state]);
 
                         }
                         q_values[action] = q_value;
@@ -284,10 +284,10 @@ public class MDPLevelController : MonoBehaviour
                         }
 
                         if (possible_action == 0)
-                            q_value += 0.8 * (reward + gamma * v_values[next_state]);
+                            q_value += 0.4 * (reward + gamma * v_values[next_state]);
 
                         else
-                            q_value += 0.1 * (reward + gamma * v_values[next_state]);
+                            q_value += 0.3 * (reward + gamma * v_values[next_state]);
 
                     }
                     q_values[action] = q_value;

@@ -29,6 +29,7 @@ public class GameState
     //AI_Controller control = new AI_Controller();
     int numMummies;
     int select_algorithm;
+    int depth;
 
     public GameState() { }
 
@@ -49,7 +50,7 @@ public class GameState
     }
 
     public GameState(Character player, List<Character> mummies, int size,
-        int[,] verticalWall, int[,] horizontalWall, Vector3 stairPosition, int algorithm)
+        int[,] verticalWall, int[,] horizontalWall, Vector3 stairPosition, int algorithm, int depth)
     {
         this.player = player;
         playerPos = player.transform.localPosition;
@@ -60,6 +61,7 @@ public class GameState
         this.horizontalWall = horizontalWall;
         this.stairPosition = stairPosition;
         this.select_algorithm = algorithm;
+        this.depth = depth;
 
         foreach (Character mummy in mummies)
         {
@@ -101,19 +103,20 @@ public class GameState
         Vector3 action_ = Vector3.zero;
         if(select_algorithm == 1)
         {
-            Minimax action = new Minimax(this, 3);
+            Minimax action = new Minimax(this, depth);
             action_ = action.GetAction();
         }
         else if (select_algorithm == 2)
         {
-            Expectimax action = new Expectimax(this, 3);
+            AlphaBeta action = new AlphaBeta(this, depth);
             action_ = action.GetAction();
         }
         else if (select_algorithm == 3)
         {
-            AlphaBeta action = new AlphaBeta(this, 4);
+            Expectimax action = new Expectimax(this, depth);
             action_ = action.GetAction();
         }
+        
         return action_;
     }
 
@@ -388,11 +391,10 @@ class Minimax
 
     public ArrayList MinimaxAgent(GameState state, int _depth, int agentIndex)
     {
-        Debug.Log(Mahattan(state.GetPlayerPosition(), state.GetStairPosition()));
+        //Debug.Log(Mahattan(state.GetPlayerPosition(), state.GetStairPosition()));
         ArrayList result = new ArrayList();
         if (_depth == depth || IsLost(state) || IsWin(state))
         {
-
             result.Add(EvaluationFunction(state));
             result.Add(Vector3.zero);
             return result;
@@ -472,18 +474,18 @@ class Minimax
     {
         int eval = 0;
 
-        eval += (-100) * Mahattan(s.GetPlayerPosition(), s.GetStairPosition());
+        eval -= Mahattan(s.GetPlayerPosition(), s.GetStairPosition());
 
 
         foreach (Vector3 mumPos in s.GetMummiesPosition())
         {
-            if ((s.GetPlayerPosition() == mumPos) || (Mahattan(s.GetPlayerPosition(), mumPos) == 0) || (Mahattan(s.GetPlayerPosition(), mumPos) == 1))
+            if (Mahattan(s.GetPlayerPosition(), mumPos) == 0)
             {
-                eval += -10000;
+                eval += -100;
             }
             else
             {
-                eval += (100) * Mahattan(s.GetPlayerPosition(), mumPos);
+                eval += Mahattan(s.GetPlayerPosition(), mumPos);
             }
 
         }
@@ -545,7 +547,6 @@ class AlphaBeta
         ArrayList result = new ArrayList();
         if (_depth == depth || IsLost(state) || IsWin(state))
         {
-
             result.Add(EvaluationFunction(state));
             result.Add(Vector3.zero);
             return result;
@@ -648,26 +649,18 @@ class AlphaBeta
     {
         int eval = 0;
 
-        eval += (-10) * Mahattan(s.GetPlayerPosition(), s.GetStairPosition());
+        eval -= Mahattan(s.GetPlayerPosition(), s.GetStairPosition());
 
 
         foreach (Vector3 mumPos in s.GetMummiesPosition())
         {
             if (Mahattan(s.GetPlayerPosition(), mumPos) == 0)
             {
-                eval += -10000;
-            }
-            else if (Mahattan(s.GetPlayerPosition(), mumPos) == 1)
-            {
-                eval += -5000;
-            }
-            else if (Mahattan(s.GetPlayerPosition(), mumPos) == 2)
-            {
-                eval += -1000;
+                eval += -100;
             }
             else
             {
-                eval += (100) * Mahattan(s.GetPlayerPosition(), mumPos);
+                eval += Mahattan(s.GetPlayerPosition(), mumPos);
             }
 
         }
@@ -811,20 +804,20 @@ class Expectimax
 
     double EvaluationFunction(GameState s)
     {
-        double eval = 0;
+        int eval = 0;
 
-        eval += (-100) * Mahattan(s.GetPlayerPosition(), s.GetStairPosition());
+        eval -= Mahattan(s.GetPlayerPosition(), s.GetStairPosition());
 
 
         foreach (Vector3 mumPos in s.GetMummiesPosition())
         {
-            if ((s.GetPlayerPosition() == mumPos) || (Mahattan(s.GetPlayerPosition(), mumPos) == 0) || (Mahattan(s.GetPlayerPosition(), mumPos) == 1))
+            if (Mahattan(s.GetPlayerPosition(), mumPos) == 0)
             {
-                eval += -10000;
+                eval += -100;
             }
             else
             {
-                eval += (500) * Mahattan(s.GetPlayerPosition(), mumPos);
+                eval += Mahattan(s.GetPlayerPosition(), mumPos);
             }
 
         }
