@@ -179,9 +179,9 @@ public class MDPPolicy : MonoBehaviour
     }
 
 
-    Array Extract_policy(int []v_values, double gamma, ArrayList hole_list, int stair_pos)
+    Array Extract_policy(double []v_values, double gamma, ArrayList hole_list, int stair_pos)
     {
-        double[] policy = new double[observation_space];
+        int[] policy = new int[observation_space];
         Array.Clear(policy, 0, policy.Length); // set the v_values array to 0
 
 
@@ -271,12 +271,12 @@ public class MDPPolicy : MonoBehaviour
 
         for (int i = 0; i < max_iters; i++)
         {
-            int[] pre_policy_v = new int[observation_space];
+            double[] pre_policy_v = new double[observation_space];
             Array.Copy(Compute_value_policy(policy, gamma, hole_list, stair_pos), 0, pre_policy_v, 0, observation_space);
             int[] new_policy = new int[observation_space];
-            Array.Copy(Extract_policy(pre_policy_v, gamma, hole_list, stair_pos), 0, pre_policy_v, 0, observation_space);
+            Array.Copy(Extract_policy(pre_policy_v, gamma, hole_list, stair_pos), 0, new_policy, 0, observation_space);
 
-            if (Enumerable.SequenceEqual(policy, pre_policy_v))
+            if (Enumerable.SequenceEqual(policy, new_policy))
                 break;
 
             Array.Copy(new_policy, 0, policy, 0, observation_space);
