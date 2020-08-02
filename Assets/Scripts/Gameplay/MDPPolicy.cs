@@ -32,9 +32,12 @@ public class MDPPolicy : MonoBehaviour
 
 
     // value iteration
-    public int observation_space = 36;
-    public int action_space = 4;
-
+    int observation_space = 36;
+    int action_space = 4;
+    bool isFirst = true;
+    int STAIR_POS = 0;
+    ArrayList HOLE_LIST = new ArrayList();
+    int[] policy_iter = new int[36];
     void Awake()
     {
         size = 6;
@@ -86,6 +89,7 @@ public class MDPPolicy : MonoBehaviour
                     break;
                 case "Hole":
                     hole[x, y] = 1;
+
                     break;
                 default:
                     Debug.Log("Unexpected game object with tag: " + t.tag);
@@ -120,56 +124,62 @@ public class MDPPolicy : MonoBehaviour
                 else if (state >= 12 && state <= 17) cur_pos.y = 3;
                 else if (state >= 6 && state <= 11) cur_pos.y = 4;
                 else if (state >= 0 && state <= 5) cur_pos.y = 5;
+                
+                if (hole_list.Contains(state) || state == stair_pos){
+                    q_value = 0.0;
+                }
+                else{
+                    int[] possible_actions = new int[3];
+                    if (p_action == 0) { possible_actions[0] = 0; possible_actions[1] = 3; possible_actions[2] = 1; }
+                    if (p_action == 1) { possible_actions[0] = 1; possible_actions[1] = 0; possible_actions[2] = 2; }
+                    if (p_action == 2) { possible_actions[0] = 2; possible_actions[1] = 1; possible_actions[2] = 3; }
+                    if (p_action == 3) { possible_actions[0] = 3; possible_actions[1] = 2; possible_actions[2] = 0; }
 
-                int[] possible_actions = new int[3];
-                if (p_action == 0) { possible_actions[0] = 0; possible_actions[1] = 3; possible_actions[2] = 1; }
-                if (p_action == 1) { possible_actions[0] = 1; possible_actions[1] = 0; possible_actions[2] = 2; }
-                if (p_action == 2) { possible_actions[0] = 2; possible_actions[1] = 1; possible_actions[2] = 3; }
-                if (p_action == 3) { possible_actions[0] = 3; possible_actions[1] = 2; possible_actions[2] = 0; }
-
-                for (int possible_action = 0; possible_action < possible_actions.Length; possible_action++)
-                {
-                    int next_state = 0;
-                    switch (possible_actions[possible_action])
+                    for (int possible_action = 0; possible_action < possible_actions.Length; possible_action++)
                     {
-                        case 0:
-                            if (Blocked(cur_pos, Vector3.up) || (state - 6 < 0))
-                                next_state = state;
-                            else
-                                next_state = state - 6;
-                            break;
-                        case 1:
-                            if (Blocked(cur_pos, Vector3.right) || (((state + 1) % 6) == 0))
-                                next_state = state;
-                            else
-                                next_state = state + 1;
-                            break;
-                        case 2:
-                            if (Blocked(cur_pos, Vector3.down) || (state + 6 > 35))
-                                next_state = state;
-                            else
-                                next_state = state + 6;
-                            break;
-                        case 3:
-                            if (Blocked(cur_pos, Vector3.left) || ((state % 6) == 0))
-                                next_state = state;
-                            else
-                                next_state = state - 1;
-                            break;
+                        int next_state = 0;
+                        switch (possible_actions[possible_action])
+                        {
+                            case 0:
+                                if (Blocked(cur_pos, Vector3.up) || (state - 6 < 0))
+                                    next_state = state;
+                                else
+                                    next_state = state - 6;
+                                break;
+                            case 1:
+                                if (Blocked(cur_pos, Vector3.right) || (((state + 1) % 6) == 0))
+                                    next_state = state;
+                                else
+                                    next_state = state + 1;
+                                break;
+                            case 2:
+                                if (Blocked(cur_pos, Vector3.down) || (state + 6 > 35))
+                                    next_state = state;
+                                else
+                                    next_state = state + 6;
+                                break;
+                            case 3:
+                                if (Blocked(cur_pos, Vector3.left) || ((state % 6) == 0))
+                                    next_state = state;
+                                else
+                                    next_state = state - 1;
+                                break;
+
+                        }
+
+                        double reward = Step_reward;
+                        if (hole_list.Contains(next_state)) reward = Hole_reward;
+                        else if (next_state == stair_pos) reward = Stair_reward;
+
+                        if (possible_action == 0)
+                            q_value += probability * (reward + gamma * pre_v_values[next_state]);
+
+                        else
+                            q_value += ((1.0 - probability) / 2) * (reward + gamma * pre_v_values[next_state]);
 
                     }
-
-                    double reward = Step_reward;
-                    if (hole_list.Contains(next_state)) reward = Hole_reward;
-                    else if (next_state == stair_pos) reward = Stair_reward;
-
-                    if (possible_action == 0)
-                        q_value += probability * (reward + gamma * pre_v_values[next_state]);
-
-                    else
-                        q_value += ((1.0 - probability) / 2) * (reward + gamma * pre_v_values[next_state]);
-
                 }
+                
                 v_values[state] = q_value;
             }
             if (Enumerable.SequenceEqual(v_values, pre_v_values))
@@ -202,61 +212,67 @@ public class MDPPolicy : MonoBehaviour
             else if (state >= 6 && state <= 11) cur_pos.y = 4;
             else if (state >= 0 && state <= 5) cur_pos.y = 5;
 
-
-            for (int action = 0; action < action_space; action++)
-            {
-                int[] possible_actions = new int[3]; // each direction got 3 possible actions
-
-                /// 0 : UP
-                /// 1 : RIGHT
-                /// 2 : DOWN
-                /// 3 : LEFT
-                if (action == 0) { possible_actions[0] = 0; possible_actions[1] = 3; possible_actions[2] = 1; } //UP : 3 possible actions are LEFT, UP, RIGHT
-                if (action == 1) { possible_actions[0] = 1; possible_actions[1] = 0; possible_actions[2] = 2; } //RIGHT : 3 possible actions are RIGHT, UP, DOWN
-                if (action == 2) { possible_actions[0] = 2; possible_actions[1] = 1; possible_actions[2] = 3; } //DOWN : 3 possible actions are LEFT, DOWN, RIGHT
-                if (action == 3) { possible_actions[0] = 3; possible_actions[1] = 2; possible_actions[2] = 0; } //LEFT : 3 possible actions are LEFT, UP, DOWN
-
-                for (int possible_action = 0; possible_action < possible_actions.Length; possible_action++) // check 3 possible action and set the next state
+            if (hole_list.Contains(state) || state == stair_pos){
+                for (int i = 0; i < 4; i++){
+                    act_values[i] = 0;
+                }
+            }
+            else{
+                for (int action = 0; action < action_space; action++)
                 {
-                    int next_state = 0;
-                    switch (possible_actions[possible_action])
+                    int[] possible_actions = new int[3]; // each direction got 3 possible actions
+
+                    /// 0 : UP
+                    /// 1 : RIGHT
+                    /// 2 : DOWN
+                    /// 3 : LEFT
+                    if (action == 0) { possible_actions[0] = 0; possible_actions[1] = 3; possible_actions[2] = 1; } //UP : 3 possible actions are LEFT, UP, RIGHT
+                    if (action == 1) { possible_actions[0] = 1; possible_actions[1] = 0; possible_actions[2] = 2; } //RIGHT : 3 possible actions are RIGHT, UP, DOWN
+                    if (action == 2) { possible_actions[0] = 2; possible_actions[1] = 1; possible_actions[2] = 3; } //DOWN : 3 possible actions are LEFT, DOWN, RIGHT
+                    if (action == 3) { possible_actions[0] = 3; possible_actions[1] = 2; possible_actions[2] = 0; } //LEFT : 3 possible actions are LEFT, UP, DOWN
+
+                    for (int possible_action = 0; possible_action < possible_actions.Length; possible_action++) // check 3 possible action and set the next state
                     {
-                        case 0:
-                            if (Blocked(cur_pos, Vector3.up) || (state - 6 < 0))
-                                next_state = state;
-                            else
-                                next_state = state - 6;
-                            break;
-                        case 1:
-                            if (Blocked(cur_pos, Vector3.right) || (((state + 1) % 6) == 0))
-                                next_state = state;
-                            else
-                                next_state = state + 1;
-                            break;
-                        case 2:
-                            if (Blocked(cur_pos, Vector3.down) || (state + 6 > 35))
-                                next_state = state;
-                            else
-                                next_state = state + 6;
-                            break;
-                        case 3:
-                            if (Blocked(cur_pos, Vector3.left) || ((state % 6) == 0))
-                                next_state = state;
-                            else
-                                next_state = state - 1;
-                            break;
+                        int next_state = 0;
+                        switch (possible_actions[possible_action])
+                        {
+                            case 0:
+                                if (Blocked(cur_pos, Vector3.up) || (state - 6 < 0))
+                                    next_state = state;
+                                else
+                                    next_state = state - 6;
+                                break;
+                            case 1:
+                                if (Blocked(cur_pos, Vector3.right) || (((state + 1) % 6) == 0))
+                                    next_state = state;
+                                else
+                                    next_state = state + 1;
+                                break;
+                            case 2:
+                                if (Blocked(cur_pos, Vector3.down) || (state + 6 > 35))
+                                    next_state = state;
+                                else
+                                    next_state = state + 6;
+                                break;
+                            case 3:
+                                if (Blocked(cur_pos, Vector3.left) || ((state % 6) == 0))
+                                    next_state = state;
+                                else
+                                    next_state = state - 1;
+                                break;
 
+                        }
+                        double reward = Step_reward;
+                        if (hole_list.Contains(next_state)) reward = Hole_reward;
+                        else if (next_state == stair_pos) reward = Stair_reward;
+
+
+                        if (possible_action == 0)
+                            act_values[action] += probability * (reward + gamma * v_values[next_state]);
+
+                        else
+                            act_values[action] += ((1.0 - probability) / 2) * (reward + gamma * v_values[next_state]);
                     }
-                    double reward = Step_reward;
-                    if (hole_list.Contains(next_state)) reward = Hole_reward;
-                    else if (next_state == stair_pos) reward = Stair_reward;
-
-
-                    if (possible_action == 0)
-                        act_values[action] += probability * (reward + gamma * v_values[next_state]);
-
-                    else
-                        act_values[action] += ((1.0 - probability) / 2) * (reward + gamma * v_values[next_state]);
                 }
             }
             policy[state] = Array.IndexOf(act_values, act_values.Max());
@@ -288,30 +304,29 @@ public class MDPPolicy : MonoBehaviour
     void Update()
     {
         if (!idle) return;
+        
+        if (isFirst){
+            for (int x = 0; x < 6; x++)
+            {
+                int pos = 0;
+                for (int y = 0; y < 6; y++)
+                {
+                    if (y == 0) pos = 30 + x;
+                    else if (y == 1) pos = 24 + x;
+                    else if (y == 2) pos = 18 + x;
+                    else if (y == 3) pos = 12 + x;
+                    else if (y == 4) pos = 6 + x;
+                    else if (y == 5) pos = x;
+
+                    if (hole[x, y] == 1) HOLE_LIST.Add(pos);
+                    else if (x == stairPosition.x && y == stairPosition.y) STAIR_POS = pos;
+                }
+            }
+            Array.Copy(Policy_iteration(1000, gamma, HOLE_LIST, STAIR_POS), 0, policy_iter, 0, observation_space);
+            isFirst = false;
+        }
         Vector3 direction = Vector3.zero;
 
-
-        var hole_list = new ArrayList();
-        int stair_pos = 0;
-        for (int x = 0; x < 6; x++)
-        {
-            int pos = 0;
-            for (int y = 0; y < 6; y++)
-            {
-                if (y == 0) pos = 30 + x;
-                else if (y == 1) pos = 24 + x;
-                else if (y == 2) pos = 18 + x;
-                else if (y == 3) pos = 12 + x;
-                else if (y == 4) pos = 6 + x;
-                else if (y == 5) pos = x;
-
-                if (hole[x, y] == 1) hole_list.Add(pos);
-                else if (x == stairPosition.x && y == stairPosition.y) stair_pos = pos;
-            }
-        }
-
-        int[] policy_iter = new int[observation_space];
-        Array.Copy(Policy_iteration(1000, gamma, hole_list, stair_pos), 0, policy_iter, 0, observation_space);
 
         // get player position
         int player_position = 0;

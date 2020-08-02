@@ -30,11 +30,13 @@ public class MDPLevelController : MonoBehaviour
     Vector3 stairPosition;
     Vector3 stairDirection;
     bool restrictedVision = false;
-
-
+    bool isFirst = true;
+    int STAIR_POS = 0;
+    ArrayList HOLE_LIST = new ArrayList();
     // value iteration
-    public int observation_space = 36;
-    public int action_space = 4;
+    int observation_space = 36;
+    int action_space = 4;
+    Vector3[] policy_iter = new Vector3[36];
     
     void Awake() {
         size = 6;
@@ -325,36 +327,31 @@ public class MDPLevelController : MonoBehaviour
     void Update()
     {
         if (!idle) return;
-        Vector3 direction = Vector3.zero;
-
-  
-        var hole_list = new ArrayList();
-        int stair_pos = 0;
-        for (int x = 0; x < 6; x++)
-        {
-            int pos = 0;
-            for (int y = 0; y < 6; y++)
+        //Compute holelist first time
+        if (isFirst){
+            double[] value_iter = new double[observation_space];
+            for (int x = 0; x < 6; x++)
             {
-                if (y == 0) pos = 30 + x;
-                else if (y == 1) pos = 24 + x;
-                else if (y == 2) pos = 18 + x;
-                else if (y == 3) pos = 12 + x;
-                else if (y == 4) pos = 6 + x;
-                else if (y == 5) pos = x;
+                int pos = 0;
+                for (int y = 0; y < 6; y++)
+                {
+                    if (y == 0) pos = 30 + x;
+                    else if (y == 1) pos = 24 + x;
+                    else if (y == 2) pos = 18 + x;
+                    else if (y == 3) pos = 12 + x;
+                    else if (y == 4) pos = 6 + x;
+                    else if (y == 5) pos = x;
 
-                if (hole[x, y] == 1) hole_list.Add(pos);
-                else if (x == stairPosition.x && y == stairPosition.y) stair_pos = pos;
+                    if (hole[x, y] == 1) HOLE_LIST.Add(pos);
+                    else if (x == stairPosition.x && y == stairPosition.y) STAIR_POS = pos;
+                }
+                Array.Copy(Value_iteration(10000, HOLE_LIST, STAIR_POS, gamma), 0, value_iter, 0, observation_space);
+                Array.Copy(Policy_extraction(value_iter, HOLE_LIST, STAIR_POS, gamma), 0, policy_iter, 0, observation_space);
             }
+            isFirst = false;
         }
-
-        double[] value_iter = new double[observation_space];
-
+        Vector3 direction = Vector3.zero;
         //max_iter = 1000
-        Array.Copy(Value_iteration(10000, hole_list, stair_pos, gamma), 0, value_iter, 0, observation_space);
-
-        
-        Vector3[] policy_iter = new Vector3[observation_space];
-        Array.Copy(Policy_extraction(value_iter, hole_list, stair_pos, gamma), 0, policy_iter, 0, observation_space);
         
         // get player position
         int player_position = 0;
