@@ -13,7 +13,11 @@ public class MDPLevelController : MonoBehaviour
     public GameObject dust_effect;
     
     // Internal
-    public double probability = 0.5;
+    public double probability;
+    public double gamma;
+    public double Step_reward;
+    public double Stair_reward;
+    public double Hole_reward;
     public bool idle;
     public Character player;
     
@@ -36,6 +40,10 @@ public class MDPLevelController : MonoBehaviour
         size = 6;
         idle = true;
         probability = Math.Min(1.0, probability);
+        gamma = Math.Min(1.0, gamma);
+        Step_reward = Math.Min(100.0, Step_reward);
+        Stair_reward = Math.Min(100.0, Stair_reward);
+        Hole_reward = Math.Min(100.0, Hole_reward);
         //mummies = new List<Character>();
         verticalWall = new int[size, size];
         horizontalWall = new int[size, size];
@@ -83,7 +91,7 @@ public class MDPLevelController : MonoBehaviour
     }
 
 
-    Array Value_iteration(int max_iter, ArrayList hole_list, int stair_pos, double gamma = 0.9)
+    Array Value_iteration(int max_iter, ArrayList hole_list, int stair_pos, double gamma)
     {
         
         double[] v_values = new double[observation_space]; 
@@ -168,9 +176,10 @@ public class MDPLevelController : MonoBehaviour
 
                             }
 
-                            double reward = 0.0;
-                            if (hole_list.Contains(next_state)) reward = -1.0;
-                            else if (next_state == stair_pos) reward = 1.0;
+                            double reward = Step_reward;
+                            if (hole_list.Contains(next_state)) reward = Hole_reward;
+                            else if (next_state == stair_pos) reward = Stair_reward;
+                            
 
                             if (possible_action == 0)
                                 q_value += probability * (reward + gamma * pre_v_values[next_state]);
@@ -190,15 +199,15 @@ public class MDPLevelController : MonoBehaviour
                 break;
             
         }
-        //for (int i = 0; i < 36; i++)
-        //{
-        //    Debug.Log(i + 1 + ": " + v_values[i]);
-        //}
+        for (int i = 0; i < 36; i++)
+        {
+            Debug.Log(i + 1 + ": " + v_values[i]);
+        }
         return v_values;
     }
 
 
-    Array Policy_extraction(double []v_values, ArrayList hole_list, int stair_pos,double gamma = 0.9)
+    Array Policy_extraction(double []v_values, ArrayList hole_list, int stair_pos,double gamma)
     {
         
         Vector3[] policy = new Vector3[observation_space];
@@ -275,9 +284,9 @@ public class MDPLevelController : MonoBehaviour
 
                         }
 
-                        double reward = 0.0;
-                        if (hole_list.Contains(next_state)) reward = -1.0;
-                        else if (next_state == stair_pos) reward = 1.0;
+                        double reward = Step_reward;
+                        if (hole_list.Contains(next_state)) reward = Hole_reward;
+                        else if (next_state == stair_pos) reward = Stair_reward;
 
                         if (possible_action == 0)
                             q_value += probability * (reward + gamma * v_values[next_state]);
@@ -341,11 +350,11 @@ public class MDPLevelController : MonoBehaviour
         double[] value_iter = new double[observation_space];
 
         //max_iter = 1000
-        Array.Copy(Value_iteration(1000, hole_list, stair_pos, 0.9), 0, value_iter, 0, observation_space);
+        Array.Copy(Value_iteration(10000, hole_list, stair_pos, gamma), 0, value_iter, 0, observation_space);
 
         
         Vector3[] policy_iter = new Vector3[observation_space];
-        Array.Copy(Policy_extraction(value_iter, hole_list, stair_pos, 0.9), 0, policy_iter, 0, observation_space);
+        Array.Copy(Policy_extraction(value_iter, hole_list, stair_pos, gamma), 0, policy_iter, 0, observation_space);
         
         // get player position
         int player_position = 0;
