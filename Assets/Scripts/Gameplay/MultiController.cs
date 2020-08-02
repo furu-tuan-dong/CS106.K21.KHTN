@@ -109,9 +109,7 @@ public class MultiController : MonoBehaviour
                 else if (y == 5) pos = x;
 
                 if (hole[x, y] == 1) HOLE_LIST.Add(pos);
-                else if (horizontalWall[x, y] == 1) HWALL_LIST.Add(pos);
-                else if (verticalWall[x, y] == 1) VWALL_LIST.Add(pos);
-                else if (x == stairPosition.x && y == stairPosition.y) STAIR_POS = pos;
+                if (x == stairPosition.x && y == stairPosition.y) STAIR_POS = pos;
             }
         }
         //Policy Iteration
@@ -123,6 +121,9 @@ public class MultiController : MonoBehaviour
             double[] value_iter = new double[observation_space];
             Array.Copy(Value_iteration(10000, HOLE_LIST, STAIR_POS, gamma), 0, value_iter, 0, observation_space);
             Array.Copy(Policy_extraction(value_iter, HOLE_LIST, STAIR_POS, gamma), 0, policy_iter, 0, observation_space);
+        }
+        for (int i = 0; i < 36; i++){
+            Debug.Log("i:" + i + ", value:" + policy_iter[i]);
         }
         // get player position
         int player_position = 0;
@@ -155,23 +156,35 @@ public class MultiController : MonoBehaviour
             while(true){
                 int ac = policy_iter[currentState];
                 int direc = getDirection(ac);
-                if (currentState == STAIR_POS && ac == direc){
-                    win += 1;
-                    break;
-                }
-                // Debug.Log(direc);
-                //int draftState = currentState;
-                if (direc == 0 && currentState / 6 > 0) currentState =  !HWALL_LIST.Contains(currentState - 6) ? currentState - 6 : currentState;
-                else if(direc == 1 && currentState % 6 != 5) currentState = !VWALL_LIST.Contains(currentState + 1) ? currentState + 1 : currentState;
-                else if (direc == 2 && currentState / 6 < 5) currentState =  !HWALL_LIST.Contains(currentState + 6) ? currentState + 6 : currentState;
-                else if (direc == 3 && currentState % 6 != 0) currentState = !VWALL_LIST.Contains(currentState - 1) ? currentState - 1 : currentState;
+                // Debug.Log("action:" + ac);
+                // Debug.Log("direction:" + direc);
+                // Debug.Log("First curState:" + currentState);
+                int draftState = currentState;
+                Vector3 cur_pos = new Vector3();
+                cur_pos.x = currentState % 6;
+                if (currentState >= 30 && currentState <= 35) cur_pos.y = 0;
+                else if (currentState >= 24 && currentState <= 29) cur_pos.y = 1;
+                else if (currentState >= 18 && currentState <= 23) cur_pos.y = 2;
+                else if (currentState >= 12 && currentState <= 17) cur_pos.y = 3;
+                else if (currentState >= 6 && currentState <= 11) cur_pos.y = 4;
+                else if (currentState >= 0 && currentState <= 5) cur_pos.y = 5;
+                
+                if (direc == 0 && currentState / 6 > 0) currentState =  !Blocked(cur_pos, Vector3.up) ? currentState - 6 : currentState;
+                else if(direc == 1 && currentState % 6 != 5) currentState = !Blocked(cur_pos, Vector3.right) ? currentState + 1 : currentState;
+                else if (direc == 2 && currentState / 6 < 5) currentState =  !Blocked(cur_pos, Vector3.down) ? currentState + 6 : currentState;
+                else if (direc == 3 && currentState % 6 != 0) currentState = !Blocked(cur_pos, Vector3.left) ? currentState - 1 : currentState;
+                // Debug.Log("After curState:" + currentState);
+
                 //Fall hole
                 if (HOLE_LIST.Contains(currentState)){
                     lose += 1;
                     break;
                 }
                 //Victory
-                
+                if (currentState == STAIR_POS){
+                    win += 1;
+                    break;
+                }
                 //Debug.Log(currentState);
             }
         }
@@ -493,7 +506,7 @@ public class MultiController : MonoBehaviour
         }
         for (int i = 0; i < 36; i++)
         {
-            Debug.Log(i + 1 + ": " + v_values[i]);
+            //Debug.Log(i + 1 + ": " + v_values[i]);
         }
         return v_values;
     }
