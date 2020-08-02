@@ -124,6 +124,12 @@ public class MultiController : MonoBehaviour
             Array.Copy(Value_iteration(10000, HOLE_LIST, STAIR_POS, gamma), 0, value_iter, 0, observation_space);
             Array.Copy(Policy_extraction(value_iter, HOLE_LIST, STAIR_POS, gamma), 0, policy_iter, 0, observation_space);
         }
+
+        for (int i = 0; i < 36; i++)
+        {
+            Debug.Log(policy_iter[i]);
+        }
+
         // get player position
         int player_position = 0;
         int x_pos = (int)player.transform.localPosition.x;
@@ -155,13 +161,13 @@ public class MultiController : MonoBehaviour
             while(true){
                 int ac = policy_iter[currentState];
                 int direc = getDirection(ac);
-                if (currentState == STAIR_POS && ac == direc){
+                if (currentState + direc == STAIR_POS){
                     win += 1;
                     break;
                 }
                 // Debug.Log(direc);
                 //int draftState = currentState;
-                if (direc == 0 && currentState / 6 > 0) currentState =  !HWALL_LIST.Contains(currentState - 6) ? currentState - 6 : currentState;
+                if (direc == 0 && currentState / 6  > 0) currentState =  !HWALL_LIST.Contains(currentState - 6) ? currentState - 6 : currentState;
                 else if(direc == 1 && currentState % 6 != 5) currentState = !VWALL_LIST.Contains(currentState + 1) ? currentState + 1 : currentState;
                 else if (direc == 2 && currentState / 6 < 5) currentState =  !HWALL_LIST.Contains(currentState + 6) ? currentState + 6 : currentState;
                 else if (direc == 3 && currentState % 6 != 0) currentState = !VWALL_LIST.Contains(currentState - 1) ? currentState - 1 : currentState;
@@ -491,10 +497,10 @@ public class MultiController : MonoBehaviour
                 break;
             
         }
-        for (int i = 0; i < 36; i++)
-        {
-            Debug.Log(i + 1 + ": " + v_values[i]);
-        }
+        //for (int i = 0; i < 36; i++)
+        //{
+        //    Debug.Log(i + 1 + ": " + v_values[i]);
+        //}
         return v_values;
     }
 

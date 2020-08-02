@@ -229,7 +229,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 679029717}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 3, y: 2, z: 0}
+  m_LocalPosition: {x: 2, y: 2, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1375346319}
@@ -387,6 +387,11 @@ PrefabInstance:
       propertyPath: Hole_reward
       value: -1
       objectReference: {fileID: 0}
+    - target: {fileID: 1359007718852929836, guid: fc0f129d9381b49cca4fdb105811a23e,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2905197314822862691, guid: fc0f129d9381b49cca4fdb105811a23e,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -449,6 +454,34 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: fc0f129d9381b49cca4fdb105811a23e, type: 3}
+--- !u!1 &1098867623 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 711180994517062657, guid: fc0f129d9381b49cca4fdb105811a23e,
+    type: 3}
+  m_PrefabInstance: {fileID: 1098867622}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1098867624
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1098867623}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a34e31c6afc0640c78d00ad75c0cbdbe, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  probability: 1
+  gamma: 0.9
+  Step_reward: -1
+  Stair_reward: 20
+  Hole_reward: -1
+  idle: 0
+  player: {fileID: 0}
+  NUM_RUN: 1000
+  typeMDP: 0
+  size: 6
 --- !u!4 &1375346319 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 711180994517062658, guid: fc0f129d9381b49cca4fdb105811a23e,
