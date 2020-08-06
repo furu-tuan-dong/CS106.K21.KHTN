@@ -3,7 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-
+using System.Text;
+using System.IO;
 public class MultiController : MonoBehaviour
 {
     // Internal
@@ -40,7 +41,7 @@ public class MultiController : MonoBehaviour
     {
         size = 6;
         idle = true;
-        typeMDP = 0;
+        typeMDP = Math.Min(1, typeMDP);
         probability = Math.Min(1.0, probability);
         gamma = Math.Min(1.0, gamma);
         Step_reward = Math.Min(100.0, Step_reward);
@@ -112,19 +113,21 @@ public class MultiController : MonoBehaviour
                 if (x == stairPosition.x && y == stairPosition.y) STAIR_POS = pos;
             }
         }
+        int num_converge = 0;
         //Policy Iteration
         if (typeMDP == 1){
-            Array.Copy(Policy_iteration(1000, gamma, HOLE_LIST, STAIR_POS), 0, policy_iter, 0, observation_space);
+            Array.Copy(Policy_iteration(1000, gamma, HOLE_LIST, STAIR_POS,ref num_converge), 0, policy_iter, 0, observation_space);
         }
         //Value iteration
         else if (typeMDP == 0){
             double[] value_iter = new double[observation_space];
-            Array.Copy(Value_iteration(10000, HOLE_LIST, STAIR_POS, gamma), 0, value_iter, 0, observation_space);
+            Array.Copy(Value_iteration(10000, HOLE_LIST, STAIR_POS, gamma,ref num_converge), 0, value_iter, 0, observation_space);
             Array.Copy(Policy_extraction(value_iter, HOLE_LIST, STAIR_POS, gamma), 0, policy_iter, 0, observation_space);
         }
-        for (int i = 0; i < 36; i++){
-            Debug.Log("i:" + i + ", value:" + policy_iter[i]);
-        }
+        // for (int i = 0; i < 36; i++)
+        // {
+        //    Debug.Log("i:" + i + ", value:" + policy_iter[i]);
+        // }
         // get player position
         int player_position = 0;
         int x_pos = (int)player.transform.localPosition.x;
@@ -151,14 +154,17 @@ public class MultiController : MonoBehaviour
         }
         int win = 0;
         int lose = 0;
+        String filePath = "/Users/admin/Downloads/CS106.K21.KHTN/prof/ValueIteration/Level2.csv";
+        var csvContent = new StringBuilder();
+        var episode = new StringBuilder();
         for (int i = 0; i < NUM_RUN; i++){
             int currentState = player_position;
             while(true){
                 int ac = policy_iter[currentState];
                 int direc = getDirection(ac);
-                // Debug.Log("action:" + ac);
-                // Debug.Log("direction:" + direc);
-                // Debug.Log("First curState:" + currentState);
+                //Debug.Log("action:" + ac);
+                //Debug.Log("direction:" + direc);
+                //Debug.Log("First curState:" + currentState);
                 int draftState = currentState;
                 Vector3 cur_pos = new Vector3();
                 cur_pos.x = currentState % 6;
@@ -173,23 +179,35 @@ public class MultiController : MonoBehaviour
                 else if(direc == 1 && currentState % 6 != 5) currentState = !Blocked(cur_pos, Vector3.right) ? currentState + 1 : currentState;
                 else if (direc == 2 && currentState / 6 < 5) currentState =  !Blocked(cur_pos, Vector3.down) ? currentState + 6 : currentState;
                 else if (direc == 3 && currentState % 6 != 0) currentState = !Blocked(cur_pos, Vector3.left) ? currentState - 1 : currentState;
-                // Debug.Log("After curState:" + currentState);
+                //Debug.Log("After curState:" + currentState);
 
                 //Fall hole
                 if (HOLE_LIST.Contains(currentState)){
                     lose += 1;
+                    var newLine = String.Format("{0},{1}", i, "False");
+                    episode.AppendLine(newLine);
                     break;
                 }
                 //Victory
                 if (currentState == STAIR_POS){
                     win += 1;
+                    var newLine = String.Format("{0},{1}", i, "True");
+                    episode.AppendLine(newLine);
                     break;
                 }
                 //Debug.Log(currentState);
             }
         }
+        csvContent.AppendLine("Win," + win);
+        csvContent.AppendLine("Lose," + lose);
+        csvContent.AppendLine("Converge after i-th iteration," + num_converge);
+        csvContent.AppendLine("Episode i-th,Win");
+        csvContent.Append(episode);
+        File.WriteAllText(filePath, csvContent.ToString());
         Debug.Log(win);
         Debug.Log(lose);
+        Debug.Log("Converge after i-th iteration: " + num_converge);
+        Debug.Log(typeMDP == 1 ? "Policy" : "Value");
     }
     //Policy iteration
     Array Compute_value_policy(int[] policy, double gamma, ArrayList hole_list, int stair_pos)
@@ -374,7 +392,7 @@ public class MultiController : MonoBehaviour
         }
         return policy;
     }
-    Array Policy_iteration(int max_iters, double gamma, ArrayList hole_list, int stair_pos)
+    Array Policy_iteration(int max_iters, double gamma, ArrayList hole_list, int stair_pos, ref int num_converge)
     {
         System.Random rnd = new System.Random();
         int[] policy = new int[observation_space];
@@ -387,16 +405,17 @@ public class MultiController : MonoBehaviour
             int[] new_policy = new int[observation_space];
             Array.Copy(Extract_policy(pre_policy_v, gamma, hole_list, stair_pos), 0, new_policy, 0, observation_space);
 
-            if (Enumerable.SequenceEqual(policy, new_policy))
+            if (Enumerable.SequenceEqual(policy, new_policy)){
+                num_converge = i;
                 break;
-
+            }
             Array.Copy(new_policy, 0, policy, 0, observation_space);
         }
         
         return policy;
     }
     //Value iteration
-    Array Value_iteration(int max_iter, ArrayList hole_list, int stair_pos, double gamma)
+    Array Value_iteration(int max_iter, ArrayList hole_list, int stair_pos, double gamma, ref int num_converge)
     {
         
         double[] v_values = new double[observation_space]; 
@@ -500,8 +519,10 @@ public class MultiController : MonoBehaviour
 
             }
             
-            if (Enumerable.SequenceEqual(v_values, pre_v_values))
+            if (Enumerable.SequenceEqual(v_values, pre_v_values)){
+                num_converge = i;
                 break;
+            }
             
         }
         for (int i = 0; i < 36; i++)
